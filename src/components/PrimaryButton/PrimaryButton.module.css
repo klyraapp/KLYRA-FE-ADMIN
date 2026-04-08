@@ -1,0 +1,22 @@
+/**
+ * PrimaryButton Module CSS
+ * Styles for the primary button component
+ */
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  background: #3d9970;
+  border-color: #3d9970;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.button:hover {
+  background: #358563;
+  border-color: #358563;
+}

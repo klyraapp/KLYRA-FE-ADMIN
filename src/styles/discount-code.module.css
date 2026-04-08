@@ -1,0 +1,70 @@
+/**
+ * Discount Code Page Module CSS
+ * Styles specific to the discount code page with theme support
+ */
+
+.pageContainer {
+  padding: 24px 32px;
+  background: var(--color-bg-layout, #f8f9fa);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customerName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+.customerEmail {
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.codeText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+.actionsCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.crownIcon {
+  font-size: 16px;
+  color: #f59e0b;
+  cursor: pointer;
+}
+
+.crownIcon:hover {
+  color: #d97706;
+}
+
+.stopIcon {
+  font-size: 16px;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.stopIcon:hover {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+}

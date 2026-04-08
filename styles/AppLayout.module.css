@@ -1,0 +1,61 @@
+/**
+ * Layout Module CSS
+ * Global layout styles for the application with theme support
+ */
+
+.layoutContainer {
+  min-height: 100vh;
+  display: flex;
+}
+
+.mainLayout {
+  margin-left: 280px;
+  flex: 1;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0;
+}
+
+.desktopSidebar {
+  display: block;
+}
+
+.mainLayoutCollapsed {
+  margin-left: 80px;
+}
+
+.header {
+  background: var(--color-bg-container, #ffffff) !important;
+  padding: 0 24px !important;
+  height: 64px;
+  line-height: 64px;
+  border-bottom: 1px solid var(--color-border, #f0f0f0);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.contentWrapper {
+  min-height: calc(100vh - 64px);
+  background: var(--color-bg-layout, #f8f9fa);
+  padding: 0;
+  overflow-y: auto;
+  transition: background-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .desktopSidebar {
+    display: none;
+  }
+
+  .mainLayout {
+    margin-left: 0 !important;
+  }
+}
+
+.mobileDrawer :global(.ant-drawer-body) {
+  padding: 0;
+  background: var(--color-bg-container, #ffffff);
+}

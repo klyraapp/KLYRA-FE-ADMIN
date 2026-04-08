@@ -1,0 +1,140 @@
+/**
+ * Subscriptions Page Module CSS
+ * Styles specific to the subscriptions pages with theme support
+ */
+
+.pageContainer {
+  padding: 24px 32px;
+  background: var(--color-bg-layout, #f8f9fa);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--color-bg-container, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.exportButton:hover {
+  background: var(--color-bg-layout, #f9fafb);
+}
+
+.exportIcon {
+  font-size: 18px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customerName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+.customerEmail {
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.dateCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dateValue {
+  font-size: 14px;
+  color: var(--color-text, #374151);
+  transition: color 0.3s ease;
+}
+
+.timeValue {
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.intervalTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.intervalWeekly {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.intervalBiweekly {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.intervalTriweekly {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.intervalMonthly {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--color-bg-container, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-text, #374151);
+  transition:
+    background 0.15s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.backButton:hover {
+  background: var(--color-bg-layout, #f3f4f6);
+}
+
+.highlightedRow {
+  background: #f0fdf4 !important;
+}
+
+.highlightedRow td {
+  background: #f0fdf4 !important;
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+}

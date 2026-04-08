@@ -1,0 +1,147 @@
+/**
+ * Sidebar Module CSS
+ * Pixel-perfect styles matching the design
+ */
+
+.sidebarContainer {
+  background: #ffffff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #f0f0f0;
+}
+
+/* Logo Section */
+.logoSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.logoInnerCircle {
+  width: 10px;
+  height: 10px;
+  background: #22c55e;
+  border-radius: 50%;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+}
+
+.logoText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.collapseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.collapseButton:hover {
+  opacity: 0.7;
+}
+
+.collapseIcon {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.collapsedLogo {
+  justify-content: center;
+  padding: 20px 8px;
+  gap: 0;
+}
+
+.collapsedLogo .collapseButton {
+  position: absolute;
+  right: 8px;
+}
+
+/* Menu Container */
+.menuContainer {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.menu {
+  background: transparent !important;
+  border: none !important;
+}
+
+.menu :global(.ant-menu-item) {
+  height: 48px !important;
+  line-height: 48px !important;
+  margin: 4px 12px 4px 0 !important;
+  padding: 0 16px !important;
+  border-radius: 0 24px 24px 0 !important;
+  color: #4b5563 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.menu :global(.ant-menu-item:hover) {
+  background: #f0fdf4 !important;
+  color: #22c55e !important;
+}
+
+.menu :global(.ant-menu-item-selected) {
+  background: #dcfce7 !important;
+  color: #22c55e !important;
+}
+
+.menu :global(.ant-menu-item-selected::after) {
+  display: none !important;
+}
+
+.menu :global(.ant-menu-item .ant-menu-item-icon) {
+  font-size: 18px !important;
+  color: inherit !important;
+}
+
+.menu :global(.ant-menu-item a) {
+  color: inherit !important;
+}
+
+.menuItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.subMenuArrow {
+  font-size: 14px;
+  color: #9ca3af;
+}

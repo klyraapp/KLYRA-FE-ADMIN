@@ -1,0 +1,10 @@
+version: "3"
+services:
+  next-boilerplate:
+    image: node:18
+    volumes:
+      - .:/usr/src
+    working_dir: /usr/src
+    command: npm run dev
+    ports:
+      - "9000:3000"

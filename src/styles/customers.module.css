@@ -1,0 +1,72 @@
+/**
+ * Customers Page Module CSS
+ * Styles specific to the customers page with theme support
+ */
+
+.pageContainer {
+  padding: 24px 32px;
+  background: var(--color-bg-layout, #f8f9fa);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--color-bg-container, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.exportButton:hover {
+  background: var(--color-bg-layout, #f9fafb);
+}
+
+.exportIcon {
+  font-size: 18px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customerName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+.customerEmail {
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.dateCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dateValue {
+  font-size: 14px;
+  color: var(--color-text, #374151);
+  transition: color 0.3s ease;
+}
+
+.timeValue {
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}

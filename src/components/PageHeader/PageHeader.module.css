@@ -1,0 +1,40 @@
+/**
+ * PageHeader Module CSS
+ * Styles for page header component with theme support
+ */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin: 0;
+  line-height: 1.3;
+  transition: color 0.3s ease;
+}
+
+.subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

@@ -1,0 +1,56 @@
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem;
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 0.5rem;
+  margin: 1.25rem 0;
+  width: 100%;
+}
+
+.errorCard {
+  text-align: center;
+}
+
+.errorTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #991b1b;
+  margin-bottom: 0.5rem;
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  color: #7f1d1d;
+  margin-bottom: 1rem;
+}
+
+.errorDetails {
+  background-color: #1a1a1a;
+  color: #f87171;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  text-align: left;
+  margin: 1rem 0;
+}
+
+.retryButton {
+  background-color: #ef4444;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #dc2626;
+}

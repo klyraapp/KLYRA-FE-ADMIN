@@ -1,0 +1,86 @@
+/**
+ * PricingRuleFormModal Module CSS
+ * Styles for the pricing rule creation/edit form modal
+ */
+
+.formModal :global(.ant-modal-content) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modalHeader {
+  padding: 4px 0;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+}
+
+.form {
+  padding: 8px 0;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.halfWidth {
+  grid-column: span 1;
+}
+
+.childRulesSection {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin-bottom: 12px;
+}
+
+.childRuleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 12px;
+  background: var(--color-bg-layout, #f9fafb);
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.childField {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.removeButton {
+  margin-top: 30px;
+  flex-shrink: 0;
+}
+
+.addButton {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 8px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}

@@ -1,0 +1,91 @@
+/**
+ * AnalyticsCard Module CSS
+ * Styles for the analytics stat card component with theme support
+ */
+
+.card {
+  background: var(--color-bg-container, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconWrapper svg {
+  font-size: 20px;
+}
+
+.iconGreen {
+  background: #dcfce7;
+  color: #22c55e;
+}
+
+.iconYellow {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.iconBlue {
+  background: #e0f2fe;
+  color: #0ea5e9;
+}
+
+.cardValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0;
+  line-height: 1.2;
+  transition: color 0.3s ease;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.badgeGreen {
+  background: #3d9970;
+  color: #ffffff;
+}
+
+.badgeYellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badgeBlue {
+  background: #dbeafe;
+  color: #1e40af;
+}

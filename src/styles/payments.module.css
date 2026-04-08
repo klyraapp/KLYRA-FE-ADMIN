@@ -1,0 +1,40 @@
+/**
+ * Payments Page Module CSS
+ */
+
+.pageContainer {
+  padding: 24px 32px;
+  background: var(--color-bg-layout, #f8f9fa);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.paymentMethodTag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--color-bg-container, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.amountValue {
+  font-weight: 600;
+  color: var(--color-text, #111827);
+}
+
+.idFilter {
+  width: 100px !important;
+}
+
+.dateFilter {
+  width: 130px !important;
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+}

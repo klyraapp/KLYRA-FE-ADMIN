@@ -1,0 +1,69 @@
+/**
+ * DetailModal Styles
+ */
+
+.detailModal :global(.ant-modal-content) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.detailModal :global(.ant-modal-header) {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0;
+}
+
+.detailModal :global(.ant-modal-body) {
+  padding: 24px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.form {
+  width: 100%;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.halfWidth {
+  grid-column: span 1;
+}
+
+.fullWidth {
+  grid-column: span 2;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+:global(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #374151;
+}
+
+:global(.ant-input:disabled),
+:global(.ant-select-disabled .ant-select-selector),
+:global(.ant-picker-disabled) {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+}

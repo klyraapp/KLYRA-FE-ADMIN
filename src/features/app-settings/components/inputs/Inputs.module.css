@@ -1,0 +1,47 @@
+.multiInputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  align-items: flex-end;
+  /* Align inputs to the right to match the form theme */
+}
+
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.addItemRow {
+  width: 100%;
+  max-width: 200px;
+  /* Keep the date picker compact */
+}
+
+.overrideList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.overrideRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.overrideRow :global(.ant-picker) {
+  flex: 2;
+}
+
+.overrideRow :global(.ant-input-number) {
+  flex: 1;
+}

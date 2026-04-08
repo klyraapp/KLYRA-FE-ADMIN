@@ -1,0 +1,120 @@
+/**
+ * DetailSection Module CSS
+ * Styles for reusable detail section component
+ */
+
+.container {
+  width: 100%;
+}
+
+.section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table thead {
+  background-color: var(--color-bg-layout, #f9fafb);
+}
+
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-secondary, #6b7280);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  white-space: nowrap;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-bg-layout, #f9fafb);
+}
+
+.table td {
+  padding: 12px 16px;
+  vertical-align: top;
+}
+
+.emptyState {
+  padding: 24px;
+  text-align: center;
+  background-color: var(--color-bg-layout, #f9fafb);
+  border-radius: 8px;
+}
+
+.emptyText {
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 14px;
+}
+
+.nestedObject {
+  background-color: var(--color-bg-layout, #f9fafb);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.nestedRow {
+  margin-bottom: 4px;
+}
+
+.nestedRow:last-child {
+  margin-bottom: 0;
+}
+
+.nestedKey {
+  color: var(--color-text-secondary, #6b7280);
+  font-weight: 600;
+}
+
+.nestedValue {
+  margin-left: 8px;
+  word-break: break-all;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.statusActive {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.statusInactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}

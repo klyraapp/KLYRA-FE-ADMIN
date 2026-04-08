@@ -1,0 +1,42 @@
+/**
+ * Analytics Page Module CSS
+ * Styles specific to the analytics page with theme support
+ */
+
+.pageContainer {
+  padding: 24px 32px;
+  background: var(--color-bg-layout, #f8f9fa);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.chartSection {
+  margin-bottom: 20px;
+}
+
+.topServicesSection {
+  margin-top: 0;
+}
+
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

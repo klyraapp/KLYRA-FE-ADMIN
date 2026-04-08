@@ -1,0 +1,105 @@
+/**
+ * Pricing Rules Page Module CSS
+ * Styles specific to the pricing rules page with theme support
+ * Mirrors services-pricing.module.css for design consistency
+ */
+
+.pageContainer {
+  padding: 24px 32px;
+  background: var(--color-bg-layout, #f8f9fa);
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+.exportButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--color-bg-container, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.exportButton:hover {
+  background: var(--color-bg-layout, #f9fafb);
+}
+
+.exportIcon {
+  font-size: 18px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ruleTypeTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.ruleTypeBase {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.ruleTypeStep {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.serviceTypeTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.serviceTypeOneTime {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.serviceTypeRecurring {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.childRulesCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--color-bg-layout, #f3f4f6);
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+}

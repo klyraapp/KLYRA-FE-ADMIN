@@ -1,0 +1,48 @@
+/**
+ * StatusBadge Module CSS
+ * Styles for status indicator badges
+ */
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  line-height: 1.4;
+}
+
+.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.inactive {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.pending {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.completed {
+  background: #e0e7ff;
+  color: #6366f1;
+}
+
+.in_progress {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+.confirmed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}

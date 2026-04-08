@@ -1,0 +1,32 @@
+/**
+ * Settings page styles - uses CSS variables from ThemeProvider
+ */
+
+.pageContainer {
+  min-height: 100vh;
+  padding: 32px 40px;
+  background-color: var(--color-bg-layout);
+}
+
+.pageHeader {
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.pageBreadcrumb {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.pageContent {
+  max-width: 100%;
+}

@@ -1,0 +1,33 @@
+/**
+ * AntTable Module CSS
+ * Wrapper styles for the reusable table component with theme support
+ */
+
+.tableWrapper {
+  background: var(--color-bg-container, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #e5e7eb);
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.paginationWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border, #f3f4f6);
+  transition: border-color 0.3s ease;
+}
+
+.pageSizeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pageSizeLabel {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}

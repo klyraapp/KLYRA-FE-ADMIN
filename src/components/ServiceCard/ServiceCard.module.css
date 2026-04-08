@@ -1,0 +1,140 @@
+/**
+ * ServiceCard Module CSS
+ * Styles for the unified service card component with theme support
+ */
+
+.card {
+  background: var(--color-bg-container, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Header Styles */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.serviceHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.serviceNumber {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #9ca3af);
+  transition: color 0.3s ease;
+}
+
+.serviceName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+/* Body Styles */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.planName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+/* Footer Styles */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.packagePrice {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+.servicePrice {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  transition: color 0.3s ease;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Edit Link Button (for package variant) */
+.editLinkButton {
+  padding: 0;
+  height: auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3d9970;
+}
+
+.editLinkButton:hover {
+  color: #358563;
+}
+
+/* Edit Button (for service variant) */
+.editButton {
+  padding: 4px 12px;
+  height: auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3d9970;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 6px;
+}
+
+.editButton:hover {
+  color: #358563;
+  background: #dcfce7;
+  border-color: #bbf7d0;
+}
+
+/* Delete Button */
+.deleteButton {
+  padding: 4px 8px;
+  height: auto;
+  width: auto;
+  min-width: auto;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+}
+
+.deleteButton:hover {
+  color: #dc2626;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}

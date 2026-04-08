@@ -1,0 +1,28 @@
+/**
+ * ActionMenu Module CSS
+ * Styles for the action menu component with theme support
+ */
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.actionButton:hover {
+  background: var(--color-bg-layout, #f3f4f6);
+}
+
+.actionIcon {
+  font-size: 18px;
+  color: var(--color-text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}

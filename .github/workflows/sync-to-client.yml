@@ -1,0 +1,61 @@
+name: Sync to Client Repo
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  sync:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone source repo
+        env:
+          our_token: ${{ secrets.OUR_REPO_TOKEN }}
+        run: |
+          git clone --branch main --depth 1 \
+            https://x-access-token:${our_token}@github.com/usmanhakamDev/fe-admin-kylra.git \
+            ./source
+
+      - name: Clone client repo
+        env:
+          TOKEN: ${{ secrets.CLIENT_REPO_TOKEN }}
+        run: |
+          git clone --branch main \
+            https://x-access-token:${TOKEN}@github.com/klyraapp/KLYRA-FE-ADMIN.git \
+            ./client 2>/dev/null || {
+            git init ./client
+            cd ./client && git checkout -b main && cd ..
+          }
+
+      - name: Copy files from source to client
+        run: |
+          rsync -a --delete \
+            --exclude='.git' \
+            ./source/ ./client/
+
+      - name: Commit and push to client repo
+        env:
+          TOKEN: ${{ secrets.CLIENT_REPO_TOKEN }}
+        run: |
+          cd ./client
+
+          git config user.name "klyraapp"
+          git config user.email "salg@klyra.no"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes to sync — skipping commit."
+          else
+            TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            git commit -m "sync: ${PR_TITLE} | ${TIMESTAMP}"
+            git push https://x-access-token:${TOKEN}@github.com/klyraapp/KLYRA-FE-ADMIN.git main
+            echo "Done — changes pushed to client repo."
+          fi
+
+      - name: Clean up
+        if: always()
+        run: rm -rf ./source ./client

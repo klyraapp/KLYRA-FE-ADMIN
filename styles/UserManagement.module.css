@@ -1,0 +1,99 @@
+/**
+ * User Management Page Module CSS
+ * Pixel-perfect styles for User Management page with theme support
+ */
+
+.pageContainer {
+  padding: 24px;
+  min-height: calc(100vh - 56px);
+  background: var(--color-bg-layout, #f5f7fa);
+  transition: background-color 0.3s ease;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text, #1a1a1a);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.pageSubtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary, #9ca3af);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.addUserButton {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #22c55e !important;
+  border: none !important;
+  border-radius: 8px !important;
+  height: 44px !important;
+  padding: 0 20px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.addUserButton:hover {
+  background: #16a34a !important;
+}
+
+.addUserIcon {
+  font-size: 18px;
+}
+
+.tableCard {
+  background: var(--color-bg-container, #ffffff);
+  border-radius: 12px;
+  box-shadow: var(--box-shadow, 0 1px 3px rgba(0, 0, 0, 0.06));
+  overflow: hidden;
+  min-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .addUserButton {
+    width: 100%;
+    justify-content: center !important;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .tableCard {
+    min-height: auto;
+  }
+}

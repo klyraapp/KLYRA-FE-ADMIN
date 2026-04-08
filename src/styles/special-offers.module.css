@@ -1,0 +1,26 @@
+/**
+ * Special Offers Page Styles
+ */
+
+.pageContainer {
+  padding: 24px;
+  background-color: var(--background-color, #f5f5f5);
+  min-height: 100vh;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.offerName {
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+  font-size: 14px;
+}
+
+.offerDescription {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}

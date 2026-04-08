@@ -1,0 +1,56 @@
+/**
+ * FiltersBar Module CSS
+ * Styles for the filters bar component with theme support
+ */
+
+.filtersBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.searchWrapper {
+  flex: 1;
+  max-width: 600px;
+}
+
+.searchInput {
+  height: 40px;
+  border-radius: 8px;
+}
+
+.searchIcon {
+  color: var(--color-text-secondary, #9ca3af);
+  transition: color 0.3s ease;
+}
+
+.filtersRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusSelect {
+  min-width: 140px;
+}
+
+.datePicker {
+  width: 140px;
+}
+
+@media (max-width: 768px) {
+  .filtersBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    max-width: 100%;
+  }
+
+  .filtersRight {
+    justify-content: flex-end;
+  }
+}

@@ -1,0 +1,160 @@
+/**
+ * Header Module CSS
+ * Pixel-perfect styles matching the navbar design with theme support
+ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 56px;
+  padding: 0 24px;
+  background: var(--color-bg-container, #ffffff);
+  border-bottom: 1px solid var(--color-border, #f0f0f0);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Spacer */
+.spacer {
+  flex: 1;
+}
+
+.mobileMenuBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-right: 16px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.mobileMenuBtn:hover {
+  background: var(--color-bg-layout, #f5f5f5);
+}
+
+/* Right Section */
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Search */
+.searchWrapper {
+  width: 200px;
+}
+
+.searchInput {
+  height: 36px;
+  border-radius: 18px !important;
+  background: var(--color-bg-layout, #f5f5f5) !important;
+  border: none !important;
+  padding: 0 16px !important;
+}
+
+.searchInput:hover,
+.searchInput:focus {
+  background: var(--color-bg-layout, #eeeeee) !important;
+  box-shadow: none !important;
+}
+
+.searchInput :global(.ant-input) {
+  background: transparent !important;
+  font-size: 13px !important;
+  color: var(--color-text-secondary, #6b7280) !important;
+}
+
+.searchInput :global(.ant-input::placeholder) {
+  color: var(--color-text-secondary, #9ca3af) !important;
+  font-size: 13px !important;
+}
+
+.searchInput :global(.ant-input-suffix) {
+  margin-left: 8px;
+}
+
+.searchIcon {
+  font-size: 14px;
+  color: var(--color-text-secondary, #9ca3af);
+}
+
+/* Actions */
+.actionsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.themeToggle {
+  background: #e5e7eb !important;
+}
+
+.themeToggle:global(.ant-switch-checked) {
+  background: var(--color-primary, #1a1a1a) !important;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.iconButton:hover {
+  background: var(--color-bg-layout, #f5f5f5);
+}
+
+.actionIcon {
+  font-size: 18px;
+  color: var(--color-text-secondary, #4b5563);
+  transition: color 0.3s ease;
+}
+
+.userAvatar {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.userAvatar:hover {
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+    justify-content: space-between;
+  }
+
+  .mobileMenuBtn {
+    display: flex;
+  }
+
+  .searchWrapper {
+    width: 160px;
+  }
+
+  .actionsWrapper {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchWrapper {
+    display: none;
+  }
+}
