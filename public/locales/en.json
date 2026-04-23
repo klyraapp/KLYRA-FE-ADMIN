@@ -33,7 +33,7 @@
     "in_progress": "In Progress",
     "confirmed": "Confirmed",
     "cancelled": "Cancelled",
-    "expired": "Expired",
+    "expired": "Waiting payment",
     "paid": "Paid",
     "failed": "Failed",
     "unpaid": "Unpaid"

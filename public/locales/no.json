@@ -33,7 +33,7 @@
     "in_progress": "Under behandling",
     "confirmed": "Bekreftet",
     "cancelled": "Kansellert",
-    "expired": "Utløpt",
+    "expired": "Venter betaling",
     "paid": "Betalt",
     "failed": "Mislyktes",
     "unpaid": "Ubetalt"

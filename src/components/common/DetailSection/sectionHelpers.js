@@ -4,19 +4,33 @@
  */
 
 import { getSafeValue, safeMap } from "@/utils/safeRendering";
+import { useTranslation } from "@/hooks/useTranslation";
 import styles from "./DetailSection.module.css";
 
-const StatusBadge = ({ status, activeValue = true }) => (
-  <span
-    className={`${styles.statusBadge} ${status === activeValue ? styles.statusActive : styles.statusInactive}`}
-  >
-    {typeof status === "boolean"
-      ? status
-        ? "Active"
-        : "Inactive"
-      : String(status)}
-  </span>
-);
+const StatusBadge = ({ status, activeValue = true }) => {
+  const { t } = useTranslation();
+
+  const getLabel = () => {
+    if (status === "EXPIRED") return t("status.expired");
+    if (status === "ACTIVE") return t("status.paid");
+    if (status === "PENDING") return t("status.unpaid");
+    if (status === "CANCELLED") return t("status.cancelled");
+
+    if (typeof status === "boolean") {
+      return status ? t("common.active") : t("common.inactive");
+    }
+
+    return String(status);
+  };
+
+  return (
+    <span
+      className={`${styles.statusBadge} ${status === activeValue ? styles.statusActive : styles.statusInactive}`}
+    >
+      {getLabel()}
+    </span>
+  );
+};
 
 export const createExtraServicesSection = (extraServices) => {
   if (!extraServices || extraServices.length === 0) {
