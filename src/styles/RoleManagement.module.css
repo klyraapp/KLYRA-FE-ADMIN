@@ -1,0 +1,146 @@
+/**
+ * Role Management Styles
+ * Styles for role management pages and grouped permissions UI
+ */
+
+/* Page layout */
+.pageContainer {
+  padding: 24px;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin: 0;
+}
+
+.pageSubtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+}
+
+.tableCard {
+  background: var(--color-bg-container, #ffffff);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Grouped permissions modal */
+.permissionsSection {
+  margin-top: 16px;
+}
+
+.permissionsSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.permissionsSectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin: 0;
+}
+
+.permissionGroups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.permissionGroup {
+  background: var(--color-bg-layout, #f9fafb);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.permissionGroupHeader {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.permissionGroupTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.permissionGroupItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Role badges */
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--color-primary-bg, #ecfdf5);
+  color: var(--color-primary, #3d9970);
+  margin: 2px;
+}
+
+.permissionCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-primary-bg, #ecfdf5);
+  color: var(--color-primary, #3d9970);
+}
+
+/* User roles page */
+.userRolesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.directPermissionsSection {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.directPermissionsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  margin-bottom: 12px;
+}

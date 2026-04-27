@@ -7,6 +7,7 @@ import {
   createUser,
   deleteUser,
   getUserById,
+  getAdmins,
   getUsers,
   updateUser,
 } from "@/api/userApi";
@@ -23,6 +24,32 @@ export const useUsers = (params = {}, options = {}) => {
       const rawData = response?.data?.records || response?.data || [];
       
       const records = Array.isArray(rawData) ? rawData : [];
+      
+      return records.map(user => ({
+        id: user?.id,
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+        isActive: Boolean(user?.isActive),
+        createdAt: user?.createdAt,
+        ...user
+      }));
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    ...options,
+  });
+};
+
+export const useAdmins = (params = {}, options = {}) => {
+  return useQuery({
+    queryKey: ["admins", params],
+    queryFn: async () => {
+      const response = await getAdmins(params);
+      // Structure: [[user1, user2], totalCount]
+      const [records = [], count = 0] = response?.data || [[], 0];
       
       return records.map(user => ({
         id: user?.id,

@@ -1,36 +1,38 @@
+/**
+ * RolesTableTop Component
+ * Header section for the roles table with Create Role button
+ * Uses RBAC hook for permission-based button visibility
+ */
+
+import usePermission from "@/hooks/usePermission";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "antd";
 import { UserAddOutlined } from "@ant-design/icons";
-import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import { PERMISSIONS } from "@/utils/constant";
-import { checkUserAssignPermissions } from "@/utils/utils";
-import { getTranslation } from "../../../translations";
+import PropTypes from "prop-types";
+import { memo } from "react";
 
 const RolesTableTop = ({ handleOpenModal }) => {
-  const [roleCreatePermission, setRoleCreatePermission] = useState(false);
-  const { profileData } = useSelector((state) => state.users);
-
-  useEffect(() => {
-    setRoleCreatePermission(
-      checkUserAssignPermissions(
-        PERMISSIONS?.ADD_ROLES,
-        profileData?.permissions,
-      ),
-    );
-  }, [profileData?.permissions]);
+  const { t } = useTranslation();
 
   return (
-    <div style={{ textAlign: "right" }}>
-      <Button
-        type="primary"
-        onClick={handleOpenModal}
-        icon={<UserAddOutlined />}
-        disabled={!roleCreatePermission}
-      >
-        {getTranslation(profileData?.userLanguage, "add_roles")}
-      </Button>
+    <div style={{ textAlign: "right", marginBottom: 16 }}>
+      <PermissionGuard permission={PERMISSION_KEYS.ROLE_CREATE}>
+        <Button
+          type="primary"
+          onClick={handleOpenModal}
+          icon={<UserAddOutlined />}
+        >
+          {t("pages.roles.addRole") || "Add Role"}
+        </Button>
+      </PermissionGuard>
     </div>
   );
 };
 
-export default RolesTableTop;
+RolesTableTop.propTypes = {
+  handleOpenModal: PropTypes.func.isRequired,
+};
+
+export default memo(RolesTableTop);

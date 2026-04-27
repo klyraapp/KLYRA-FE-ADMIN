@@ -8,6 +8,8 @@ import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import DetailModal from "@/components/common/DetailModal";
 import ExportSettingsModal from "@/components/export/ExportSettingsModal";
 import PageHeader from "@/components/PageHeader/PageHeader";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 import PrimaryButton from "@/components/PrimaryButton/PrimaryButton";
 import ServiceCard from "@/components/ServiceCard/ServiceCard";
 import {
@@ -17,7 +19,9 @@ import {
   useUpdateExtraService,
 } from "@/hooks/useExtraServices";
 import { useServices } from "@/hooks/useServices";
+import usePermission from "@/hooks/usePermission";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import styles from "@/styles/additional-services.module.css";
 import { ExportOutlined } from "@ant-design/icons";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
@@ -26,6 +30,7 @@ import { useCallback, useMemo, useState } from "react";
 
 const AdditionalServicesPage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [modalState, setModalState] = useState({
     type: null,
@@ -59,7 +64,7 @@ const AdditionalServicesPage = () => {
       },
       {
         name: "serviceId",
-        label: "Related Service",
+        label: t("table.relatedService"),
         type: "select",
         rules: [{ required: true }],
         options: serviceOptions,
@@ -76,8 +81,8 @@ const AdditionalServicesPage = () => {
         type: "number",
         rules: [{ required: true }],
       },
-      { name: "icon", label: "Icon", type: "icon-upload", fullWidth: true },
-      { name: "displayOrder", label: "Display Order", type: "number" },
+      { name: "icon", label: t("fields.icon"), type: "icon-upload", fullWidth: true },
+      { name: "displayOrder", label: t("fields.displayOrder"), type: "number" },
       { name: "isActive", label: t("common.active"), type: "switch" },
     ],
     [serviceOptions, t],
@@ -166,9 +171,11 @@ const AdditionalServicesPage = () => {
       >
         <ExportOutlined className={styles.exportIcon} />
       </button>
-      <PrimaryButton textKey="buttons.addServices" onClick={handleAddService}>
-        Add Services
-      </PrimaryButton>
+      <PermissionGuard permission={PERMISSION_KEYS.EXTRA_SERVICE_CREATE}>
+        <PrimaryButton textKey="buttons.addServices" onClick={handleAddService}>
+          {t("buttons.addServices")}
+        </PrimaryButton>
+      </PermissionGuard>
     </>
   );
 
@@ -186,71 +193,75 @@ const AdditionalServicesPage = () => {
   }
 
   return (
-    <div className={styles.pageContainer}>
-      <PageHeader
-        titleKey="pages.additionalServices.title"
-        subtitleKey="pages.additionalServices.subtitle"
-        actions={headerActions}
-      />
+    <PageGuard permission={PERMISSION_KEYS.EXTRA_SERVICE_READ}>
+      <div className={styles.pageContainer}>
+        <PageHeader
+          titleKey="pages.additionalServices.title"
+          subtitleKey="pages.additionalServices.subtitle"
+          actions={headerActions}
+        />
 
-      <div className={styles.cardsGrid}>
-        <ErrorBoundary>
-          {safeMap(serviceCards, (card) => (
-            <ServiceCard
-              key={card?.id}
-              variant="service"
-              title={card?.serviceName}
-              price={card?.price}
-              number={card?.number}
-              onEdit={() => handleEdit(card)}
-              onDelete={() => handleDelete(card)}
-            />
-          ))}
-        </ErrorBoundary>
+        <div className={styles.cardsGrid}>
+          <ErrorBoundary>
+            {safeMap(serviceCards, (card) => (
+              <ServiceCard
+                key={card?.id}
+                variant="service"
+                title={card?.serviceName}
+                price={card?.price}
+                number={card?.number}
+                onEdit={() => handleEdit(card)}
+                onDelete={() => handleDelete(card)}
+                canEdit={can(PERMISSION_KEYS.EXTRA_SERVICE_UPDATE)}
+                canDelete={can(PERMISSION_KEYS.EXTRA_SERVICE_DELETE)}
+              />
+            ))}
+          </ErrorBoundary>
+        </div>
+
+        <DetailModal
+          open={
+            modalState.open &&
+            (modalState.type === "view" || modalState.type === "edit")
+          }
+          onClose={closeModal}
+          onSave={handleSave}
+          title={t("modals.additionalService")}
+          data={modalState.data}
+          fields={extraServiceFields}
+          mode={modalState.type === "view" ? "view" : "edit"}
+          loading={isUpdating}
+        />
+
+        <DetailModal
+          open={modalState.open && modalState.type === "create"}
+          onClose={closeModal}
+          onSave={handleSave}
+          title={t("modals.additionalService")}
+          data={{ isActive: true, displayOrder: 0 }}
+          fields={extraServiceFields}
+          mode="edit"
+          loading={isCreating}
+        />
+
+        <DeleteConfirmModal
+          open={modalState.open && modalState.type === "delete"}
+          onConfirm={handleDeleteConfirm}
+          onCancel={closeModal}
+          title={t("modals.deleteAdditionalService")}
+          itemName={modalState.data?.name}
+          loading={isDeleting}
+        />
+
+        <ExportSettingsModal
+          open={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          pageKey="additionalServices"
+          pageLabel={t("navigation.additionalServices")}
+          getData={fetchExtraServicesForExport}
+        />
       </div>
-
-      <DetailModal
-        open={
-          modalState.open &&
-          (modalState.type === "view" || modalState.type === "edit")
-        }
-        onClose={closeModal}
-        onSave={handleSave}
-        title={t("modals.additionalService")}
-        data={modalState.data}
-        fields={extraServiceFields}
-        mode={modalState.type === "view" ? "view" : "edit"}
-        loading={isUpdating}
-      />
-
-      <DetailModal
-        open={modalState.open && modalState.type === "create"}
-        onClose={closeModal}
-        onSave={handleSave}
-        title={t("modals.additionalService")}
-        data={{ isActive: true, displayOrder: 0 }}
-        fields={extraServiceFields}
-        mode="edit"
-        loading={isCreating}
-      />
-
-      <DeleteConfirmModal
-        open={modalState.open && modalState.type === "delete"}
-        onConfirm={handleDeleteConfirm}
-        onCancel={closeModal}
-        title={t("modals.deleteAdditionalService")}
-        itemName={modalState.data?.name}
-        loading={isDeleting}
-      />
-
-      <ExportSettingsModal
-        open={exportModalOpen}
-        onClose={() => setExportModalOpen(false)}
-        pageKey="additionalServices"
-        pageLabel={t("navigation.additionalServices")}
-        getData={fetchExtraServicesForExport}
-      />
-    </div>
+    </PageGuard>
   );
 };
 

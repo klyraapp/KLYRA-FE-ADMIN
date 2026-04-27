@@ -34,11 +34,16 @@ import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
+import usePermission from "@/hooks/usePermission";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 
 
 
 const PricingRulesPage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const { getPricingRulesColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -53,6 +58,10 @@ const PricingRulesPage = () => {
     data: null,
     open: false,
   });
+
+  const canCreate = can(PERMISSION_KEYS.PRICING_RULE_CREATE);
+  const canUpdate = can(PERMISSION_KEYS.PRICING_RULE_UPDATE);
+  const canDelete = can(PERMISSION_KEYS.PRICING_RULE_DELETE);
 
   const queryParams = useMemo(() => {
     const params = {
@@ -72,7 +81,7 @@ const PricingRulesPage = () => {
   }, [searchTerm, monthFilter, pagination]);
 
   const pricingRuleViewFields = useMemo(() => [
-    { name: "id", label: "ID" },
+    { name: "id", label: t("table.id") || "ID" },
     { name: "name", label: t("pages.pricingRules.fields.name") },
     { name: "ruleType", label: t("pages.pricingRules.fields.ruleType") },
     { name: "serviceType", label: t("pages.pricingRules.fields.serviceType") },
@@ -229,8 +238,10 @@ const PricingRulesPage = () => {
         styles,
         ActionMenu,
         formatCurrency,
+        canUpdate,
+        canDelete,
       ),
-    [getPricingRulesColumns, handleRowAction],
+    [getPricingRulesColumns, handleRowAction, canUpdate, canDelete],
   );
 
   const headerActions = (
@@ -243,13 +254,16 @@ const PricingRulesPage = () => {
       >
         <ExportOutlined className={styles.exportIcon} />
       </button>
-      <PrimaryButton onClick={handleAddRule}>
-        Add Pricing Rule
-      </PrimaryButton>
+      <PermissionGuard permission={PERMISSION_KEYS.PRICING_RULE_CREATE}>
+        <PrimaryButton onClick={handleAddRule}>
+          {t("buttons.addPricingRule") || "Add Pricing Rule"}
+        </PrimaryButton>
+      </PermissionGuard>
     </>
   );
 
   return (
+    <PageGuard permission={PERMISSION_KEYS.PRICING_RULE_READ}>
     <div className={styles.pageContainer}>
       <PageHeader
         title="Pricing Rules"
@@ -307,6 +321,7 @@ const PricingRulesPage = () => {
             <DetailSection
               sections={createChildRulesSection(
                 modalState.data?.childRules,
+                t
               )}
             />
           )}
@@ -355,6 +370,7 @@ const PricingRulesPage = () => {
         getData={fetchRulesForExport}
       />
     </div>
+    </PageGuard>
   );
 };
 

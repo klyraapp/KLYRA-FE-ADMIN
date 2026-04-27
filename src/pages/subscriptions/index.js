@@ -11,14 +11,17 @@ import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 // import StripeCardUpdate from "@/components/common/StripeCardUpdate/StripeCardUpdate";
 import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageHeader from "@/components/PageHeader/PageHeader";
+import PageGuard from "@/components/common/RBAC/PageGuard";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
 import { useDisabledDates } from "@/hooks/useBookings";
 import {
   useSubscriptions,
   useUpdateSubscription,
 } from "@/hooks/useSubscriptions";
+import usePermission from "@/hooks/usePermission";
 import useTableColumns from "@/hooks/useTableColumns";
 import { useTranslation } from "@/hooks/useTranslation";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import styles from "@/styles/subscriptions.module.css";
 import {
   ALLOWED_SUBSCRIPTION_STATUS_TRANSITIONS
@@ -31,6 +34,13 @@ import { useCallback, useMemo, useState } from "react";
 
 const SubscriptionsPage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
+
+  const [modalState, setModalState] = useState({
+    type: null,
+    data: null,
+    open: false,
+  });
 
   const SUBSCRIPTION_FIELDS = useMemo(() => [
     { name: "id", label: t("table.subscriptionId") },
@@ -81,7 +91,11 @@ const SubscriptionsPage = () => {
     { value: "CANCELLED", label: t("status.cancelled") },
   ], [t]);
 
-  const { data: disabledData } = useDisabledDates();
+  const editingServiceId =
+    modalState.type === "edit"
+      ? modalState.data?.serviceId || modalState.data?.service?.id
+      : null;
+  const { data: disabledData } = useDisabledDates(editingServiceId);
 
   const disabledDate = useCallback((current) => {
     if (!current) return false;
@@ -99,11 +113,6 @@ const SubscriptionsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
-  const [modalState, setModalState] = useState({
-    type: null,
-    data: null,
-    open: false,
-  });
 
   const queryParams = useMemo(() => {
     const params = {
@@ -270,80 +279,83 @@ const SubscriptionsPage = () => {
         ActionMenu,
         formatDate,
         formatCurrency,
+        can(PERMISSION_KEYS.SUBSCRIPTION_UPDATE),
       ),
-    [getSubscriptionsColumns, handleRowAction],
+    [getSubscriptionsColumns, handleRowAction, can],
   );
 
   return (
-    <div className={styles.pageContainer}>
-      <PageHeader
-        titleKey="pages.subscriptions.title"
-        subtitleKey="pages.subscriptions.subtitle"
-      />
-
-      <FiltersBar
-        onStatusChange={handleStatusChange}
-        showStatusFilter={false}
-        showDateFilter={false}
-        showSearch={false}
-      />
-
-      <ErrorBoundary>
-        <AntTable
-          columns={columns}
-          dataSource={subscriptions}
-          rowKey="id"
-          showPagination
-          defaultPageSize={10}
-          loading={isLoading}
-          onRow={(record) => ({
-            onClick: () => handleRowClick(record),
-            style: { cursor: "pointer" },
-          })}
-          pagination={{
-            current: Math.floor(pagination.skip / pagination.take) + 1,
-            pageSize: pagination.take,
-            total: totalCount,
-          }}
-          onChange={(paginationConfig) => {
-            if (paginationConfig?.current && paginationConfig?.pageSize) {
-              handlePageChange(
-                paginationConfig.current,
-                paginationConfig.pageSize,
-              );
-            }
-          }}
+    <PageGuard permission={PERMISSION_KEYS.SUBSCRIPTION_READ}>
+      <div className={styles.pageContainer}>
+        <PageHeader
+          titleKey="pages.subscriptions.title"
+          subtitleKey="pages.subscriptions.subtitle"
         />
-      </ErrorBoundary>
 
-      <DetailModal
-        open={modalState.open && modalState.type === "view"}
-        onClose={closeModal}
-        title={t("pages.subscriptions.subscription")}
-        data={modalState.data}
-        fields={SUBSCRIPTION_FIELDS}
-        mode="view"
-      />
-
-      <DetailModal
-        open={modalState.open && modalState.type === "edit"}
-        onClose={closeModal}
-        onSave={handleUpdate}
-        title={t("pages.subscriptions.subscription")}
-        data={modalState.data}
-        fields={editFields}
-        mode="edit"
-        loading={isUpdating}
-      >
-        {/* 
-        <StripeCardUpdate
-          key={modalState.open ? `open-${modalState.data?.id}` : 'closed'}
-          onUpdate={handleCardUpdate}
-          loading={isUpdatingCard}
+        <FiltersBar
+          onStatusChange={handleStatusChange}
+          showStatusFilter={false}
+          showDateFilter={false}
+          showSearch={false}
         />
-        */}
-      </DetailModal>
-    </div>
+
+        <ErrorBoundary>
+          <AntTable
+            columns={columns}
+            dataSource={subscriptions}
+            rowKey="id"
+            showPagination
+            defaultPageSize={10}
+            loading={isLoading}
+            onRow={(record) => ({
+              onClick: () => handleRowClick(record),
+              style: { cursor: "pointer" },
+            })}
+            pagination={{
+              current: Math.floor(pagination.skip / pagination.take) + 1,
+              pageSize: pagination.take,
+              total: totalCount,
+            }}
+            onChange={(paginationConfig) => {
+              if (paginationConfig?.current && paginationConfig?.pageSize) {
+                handlePageChange(
+                  paginationConfig.current,
+                  paginationConfig.pageSize,
+                );
+              }
+            }}
+          />
+        </ErrorBoundary>
+
+        <DetailModal
+          open={modalState.open && modalState.type === "view"}
+          onClose={closeModal}
+          title={t("pages.subscriptions.subscription")}
+          data={modalState.data}
+          fields={SUBSCRIPTION_FIELDS}
+          mode="view"
+        />
+
+        <DetailModal
+          open={modalState.open && modalState.type === "edit"}
+          onClose={closeModal}
+          onSave={handleUpdate}
+          title={t("pages.subscriptions.subscription")}
+          data={modalState.data}
+          fields={editFields}
+          mode="edit"
+          loading={isUpdating}
+        >
+          {/* 
+          <StripeCardUpdate
+            key={modalState.open ? `open-${modalState.data?.id}` : 'closed'}
+            onUpdate={handleCardUpdate}
+            loading={isUpdatingCard}
+          />
+          */}
+        </DetailModal>
+      </div>
+    </PageGuard>
   );
 };
 

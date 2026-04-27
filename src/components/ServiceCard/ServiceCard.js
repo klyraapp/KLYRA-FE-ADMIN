@@ -20,6 +20,8 @@ const ServiceCard = ({
   number,
   onEdit,
   onDelete,
+  canEdit = false,
+  canDelete = false,
 }) => {
   const isPackageVariant = variant === "package";
 
@@ -54,21 +56,25 @@ const ServiceCard = ({
           {price}
         </span>
         <div className={styles.actions}>
-          <Button
-            type={isPackageVariant ? "link" : "text"}
-            className={
-              isPackageVariant ? styles.editLinkButton : styles.editButton
-            }
-            onClick={onEdit}
-          >
-            Edit
-          </Button>
-          <Button
-            type="text"
-            icon={<DeleteOutlined />}
-            className={styles.deleteButton}
-            onClick={onDelete}
-          />
+          {canEdit && (
+            <Button
+              type={isPackageVariant ? "link" : "text"}
+              className={
+                isPackageVariant ? styles.editLinkButton : styles.editButton
+              }
+              onClick={onEdit}
+            >
+              Edit
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              type="text"
+              icon={<DeleteOutlined />}
+              className={styles.deleteButton}
+              onClick={onDelete}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -84,6 +90,8 @@ ServiceCard.propTypes = {
   number: PropTypes.number,
   onEdit: PropTypes.func,
   onDelete: PropTypes.func,
+  canEdit: PropTypes.bool,
+  canDelete: PropTypes.bool,
 };
 
 ServiceCard.defaultProps = {
@@ -93,6 +101,8 @@ ServiceCard.defaultProps = {
   number: null,
   onEdit: null,
   onDelete: null,
+  canEdit: false,
+  canDelete: false,
 };
 
 export default memo(ServiceCard);

@@ -6,6 +6,8 @@
 
 import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
+import "dayjs/locale/nb";
 
 const LanguageContext = createContext(null);
 
@@ -34,6 +36,12 @@ export const LanguageProvider = ({ children }) => {
 
     setCurrentLanguage(validLanguage);
     setIsInitialized(true);
+
+    if (validLanguage === "no") {
+      dayjs.locale("nb");
+    } else {
+      dayjs.locale("en");
+    }
 
     if (typeof document !== "undefined") {
       document.documentElement.lang = validLanguage;

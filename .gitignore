@@ -44,3 +44,4 @@ yarn.lock
 
 # Exclude package-lock.json from version control
 package-lock.json
+.vscode/

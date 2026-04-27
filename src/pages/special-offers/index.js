@@ -21,9 +21,14 @@ import { ExportOutlined } from "@ant-design/icons";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
 import { useCallback, useMemo, useState } from "react";
+import usePermission from "@/hooks/usePermission";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 
 const SpecialOffersPage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const { getSpecialOffersColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -35,6 +40,11 @@ const SpecialOffersPage = () => {
     data: null,
     open: false,
   });
+
+  const canCreate = can(PERMISSION_KEYS.OFFER_CREATE);
+  const canUpdate = can(PERMISSION_KEYS.OFFER_UPDATE);
+  // Special Offers usually don't have a separate delete but let's check update
+  const canDelete = false; 
 
   const OFFER_FIELDS = useMemo(
     () => [
@@ -183,9 +193,10 @@ const SpecialOffersPage = () => {
         StatusBadge,
         ActionMenu,
         formatDate,
-        false,
+        canUpdate,
+        canDelete,
       ),
-    [getSpecialOffersColumns, handleRowAction],
+    [getSpecialOffersColumns, handleRowAction, canUpdate, canDelete],
   );
 
   const handleExport = useCallback(() => {
@@ -206,13 +217,16 @@ const SpecialOffersPage = () => {
       >
         <ExportOutlined className={styles.exportIcon} />
       </button>
-      <PrimaryButton textKey="buttons.createOffer" onClick={handleCreateOffer}>
-        {t("buttons.createOffer")}
-      </PrimaryButton>
+      <PermissionGuard permission={PERMISSION_KEYS.OFFER_CREATE}>
+        <PrimaryButton textKey="buttons.createOffer" onClick={handleCreateOffer}>
+          {t("buttons.createOffer")}
+        </PrimaryButton>
+      </PermissionGuard>
     </>
   );
 
   return (
+    <PageGuard permission={PERMISSION_KEYS.OFFER_READ}>
     <div className={styles.pageContainer}>
       <PageHeader
         titleKey="pages.specialOffers.title"
@@ -287,6 +301,7 @@ const SpecialOffersPage = () => {
         getData={fetchOffersForExport}
       />
     </div>
+    </PageGuard>
   );
 };
 

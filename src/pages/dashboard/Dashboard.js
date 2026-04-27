@@ -12,14 +12,45 @@ import StatsCard from "@/components/dashboard/StatsCard/StatsCard";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
 import { useDashboardData } from "@/hooks/useAnalytics";
 import { useTranslation } from "@/hooks/useTranslation";
+import { Spin } from "antd";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import { SIDEBAR_PERMISSIONS } from "@/utils/sidebarPermissions";
+import usePermission from "@/hooks/usePermission";
+import { useRouter } from "next/router";
 import styles from "../../../styles/dashboard.module.css";
 
 const Dashboard = () => {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { can, canAny } = usePermission();
   const { data: dashboardData, isLoading } = useDashboardData();
+
+  // Redirect to the first available route if user doesn't have dashboard access
+  useEffect(() => {
+    const hasDashboardAccess = can(PERMISSION_KEYS.DASHBOARD_READ);
+    
+    if (!hasDashboardAccess) {
+      // Find the first route from sidebar config (excluding root itself) that the user can access
+      const routes = Object.keys(SIDEBAR_PERMISSIONS).filter(route => route !== "/");
+      
+      const firstAvailableRoute = routes.find(route => {
+        const requiredPermission = SIDEBAR_PERMISSIONS[route];
+        if (!requiredPermission) return true;
+        
+        if (Array.isArray(requiredPermission)) {
+          return canAny(requiredPermission);
+        }
+        return can(requiredPermission);
+      });
+
+      if (firstAvailableRoute) {
+        router.replace(firstAvailableRoute);
+      }
+    }
+  }, [can, canAny, router]);
 
   const stats = useMemo(() => {
     if (!dashboardData?.summary) return [];
@@ -149,6 +180,23 @@ const Dashboard = () => {
     [t],
   );
 
+  const hasDashboardAccess = can(PERMISSION_KEYS.DASHBOARD_READ);
+
+  if (!hasDashboardAccess) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <Spin size="large" tip="Redirecting..." />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.dashboardContainer}>
       <DashboardHeader
@@ -171,7 +219,7 @@ const Dashboard = () => {
           ))}
         </ErrorBoundary>
       </div>
- 
+
       <div className={styles.chartsRow}>
         <ErrorBoundary>
           <ServiceRequestChart

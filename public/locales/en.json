@@ -23,12 +23,15 @@
     "all": "All",
     "of": "of",
     "items": "items",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "selectAll": "Select All",
+    "list": "List",
+    "dates": "Dates"
   },
   "status": {
     "active": "Active",
     "inactive": "Inactive",
-    "pending": "Pending",
+    "pending": "Waiting payment",
     "completed": "Completed",
     "in_progress": "In Progress",
     "confirmed": "Confirmed",
@@ -76,7 +79,9 @@
     "additionalService": "Additional Service",
     "deleteAdditionalService": "Delete Additional Service",
     "pricingRule": "Pricing Rule",
-    "deletePricingRule": "Delete Pricing Rule"
+    "deletePricingRule": "Delete Pricing Rule",
+    "role": "Role",
+    "user": "User"
   },
   "export": {
     "dataRetention": "Data Retention (days)",
@@ -132,6 +137,7 @@
     "extraServiceDeleteFailed": "Failed to delete extra service",
     "settingsUpdated": "Settings updated successfully",
     "settingsUpdateFailed": "Failed to update settings",
+    "leaveBlankToKeep": "Leave blank to keep current",
     "pricingRuleCreated": "Pricing rule created successfully",
     "pricingRuleCreateFailed": "Failed to create pricing rule",
     "pricingRuleUpdated": "Pricing rule updated successfully",
@@ -147,7 +153,9 @@
     "paymentMethodUpdateFailed": "Failed to update payment method",
     "selectOneRecurringOneTime": "You must select at least one recurring and one one-time pricing rule.",
     "selectOneRecurring": "You must select at least one recurring pricing rule.",
-    "selectOneOneTime": "You must select at least one one-time pricing rule."
+    "selectOneOneTime": "You must select at least one one-time pricing rule.",
+    "saturdayOnPriceRequired": "Saturday On Price (%) is required and must be greater than 0 when Saturday On is enabled.",
+    "sundayOnPriceRequired": "Sunday On Price (%) is required and must be greater than 0 when Sunday On is enabled."
   },
   "navigation": {
     "home": "Home",
@@ -166,7 +174,10 @@
     "settings": "Settings",
     "pricingRules": "Pricing Rules",
     "subscriptions": "Subscriptions",
-    "payments": "Payments"
+    "payments": "Payments",
+    "accessControl": "Access Control",
+    "roles": "Roles",
+    "userRoles": "User Roles"
   },
   "resultPerPage": "Results per page",
   "createCode": "Create Code",
@@ -201,7 +212,41 @@
     },
     "bookings": {
       "title": "Bookings",
-      "subtitle": "Manage all your cleaning bookings"
+      "subtitle": "Manage all your cleaning bookings",
+      "fields": {
+        "adminNotes": "Admin Notes",
+        "bookingNumber": "Booking Number",
+        "status": "Status",
+        "paymentStatus": "Payment Status",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "service": "Service",
+        "accommodationType": "Accommodation Type",
+        "numberOfBathrooms": "Number of Bathrooms",
+        "areaSqm": "Area (sqm)",
+        "areaSqft": "Area (sqft)",
+        "bookingDate": "Booking Date",
+        "startTime": "Start Time",
+        "streetAddress": "Street Address",
+        "city": "City",
+        "postalCode": "Postal Code",
+        "country": "Country",
+        "freeParking": "Free Parking",
+        "parkingSurcharge": "Parking Surcharge",
+        "hasPets": "Has Pets",
+        "petSurcharge": "Pet Surcharge",
+        "accessMethod": "Access Method",
+        "subtotal": "Subtotal",
+        "taxRate": "Tax Rate (%)",
+        "taxAmount": "Tax Amount",
+        "discountAmount": "Discount Amount",
+        "totalAmount": "Total Amount",
+        "specialInstructions": "Special Instructions",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At"
+      }
     },
     "services": {
       "title": "Services & Pricing",
@@ -256,15 +301,58 @@
       "subscription": "Subscription",
       "detailSubtitle": "View all bookings for this subscription",
       "backToList": "Back to Subscriptions",
-      "expectedPrice": "Expected price for the next booking: {price}"
+      "expectedPrice": "Expected price for the next booking: {price}",
+      "sections": {
+        "details": "Subscription Details",
+        "id": "ID",
+        "status": "Status",
+        "interval": "Interval",
+        "nextScheduled": "Next Scheduled",
+        "lastNotification": "Last Notification",
+        "createdAt": "Created At",
+        "noInfo": "No subscription information available"
+      }
     },
     "payments": {
       "title": "Payments",
       "subtitle": "Manage and monitor all payment transactions",
       "payment": "Payment"
+    },
+    "roles": {
+      "title": "Role Management",
+      "subtitle": "Manage roles and their permissions",
+      "addRole": "Add Role",
+      "roleName": "Role Name",
+      "roleNamePlaceholder": "Enter role name",
+      "roleNameRequired": "Please enter a role name",
+      "permissions": "Permissions",
+      "deleteTitle": "Delete Role",
+      "id": "ID",
+      "permissionsCount": "Permissions",
+      "createdAt": "Created At"
+    },
+    "userRoles": {
+      "title": "User Role Assignment",
+      "subtitle": "Assign and manage roles for users",
+      "addUser": "Add New User",
+      "deleteTitle": "Delete User",
+      "name": "Name",
+      "email": "Email",
+      "roles": "Role(s)",
+      "noRoles": "No roles",
+      "viewRoles": "View Roles",
+      "editRoles": "Edit Roles",
+      "userDetails": "User Details",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "selectRoles": "Assign Roles",
+      "selectRolesPlaceholder": "Select roles",
+      "overridePermissions": "Override with direct permissions",
+      "directPermissions": "Direct Permissions"
     }
   },
   "table": {
+    "id": "ID",
     "customerId": "Customer ID",
     "name": "Name",
     "email": "Email",
@@ -286,11 +374,19 @@
     "price": "Price",
     "basePrice": "Base Price",
     "allowRecurring": "Allow Recurring Bookings",
+    "sundayOnPricePercentage": "Sunday On Price (%)",
+    "sundayOn": "Sunday On",
+    "saturdayOn": "Saturday On",
+    "saturdayOnPricePercentage": "Saturday On Price (%)",
     "allowOneTime": "Allow One-Time Bookings",
     "applyDrivingFee": "Apply Driving Fee",
     "code": "Code",
     "discount": "Discount",
     "discountType": "Discount Type",
+    "percentage": "Percentage",
+    "fixedAmount": "Fixed Amount",
+    "maxUsageCount": "Max Usage Count",
+    "maxUsagePerUser": "Max Usage Per User",
     "validFrom": "Valid From",
     "validTo": "Valid To",
     "description": "Description",
@@ -315,7 +411,18 @@
     "updatedAt": "Updated At",
     "userId": "User ID",
     "failureReason": "Failure Reason",
-    "lastNotificationSent": "Last Notification Sent"
+    "lastNotificationSent": "Last Notification Sent",
+    "adminNotes": "Admin Notes",
+    "extraServices": "Extra Services",
+    "qty": "Qty",
+    "total": "Total",
+    "itemName": "Item Name",
+    "order": "Order",
+    "ruleType": "Rule Type",
+    "maxArea": "Max Area",
+    "stepSize": "Step Size",
+    "childRules": "Child Rules",
+    "relatedService": "Related Service"
   },
   "filters": {
     "searchPlaceholder": "Search...",
@@ -369,11 +476,13 @@
     "alreadySelected": "Already selected",
     "selectDate": "Select date",
     "addOverride": "Add Override",
-    "limit": "Limit"
+    "limit": "Limit",
+    "cronSettings": "Cron Settings",
+    "recurringInvoicingDaysBeforeBooking": "Recurring Invoicing Days Before Booking"
   },
   "dashboard": {
     "totalBookings": "Total Bookings",
-    "pending": "Pending",
+    "pending": "Waiting payment",
     "revenue": "Revenue",
     "activeCustomers": "Active Customers",
     "serviceRequests": "Service Requests",

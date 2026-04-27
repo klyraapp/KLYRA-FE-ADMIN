@@ -31,6 +31,6 @@ export const deleteBooking = (id) => {
   return api.delete(`${BOOKINGS_ENDPOINT}/${id}`);
 };
 
-export const getDisabledDates = () => {
-  return api.get(`${BOOKINGS_ENDPOINT}/calendar/disabled-dates`);
+export const getDisabledDates = (serviceId) => {
+  return api.get(`${BOOKINGS_ENDPOINT}/calendar/disabled-dates/${serviceId}`);
 };

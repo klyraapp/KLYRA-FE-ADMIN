@@ -12,10 +12,15 @@
   position: fixed;
   left: 0;
   top: 0;
-  transition:
-    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.3s ease;
-  overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 .sidebarCollapsed {
@@ -39,9 +44,7 @@
   display: flex;
   align-items: center;
   height: 32px;
-  transition:
-    opacity 0.2s ease,
-    width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
@@ -92,9 +95,7 @@
   padding: 14px 16px;
   border-radius: 12px;
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.15s ease, padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .menuItemCollapsed {
@@ -130,10 +131,7 @@
   font-weight: 500;
   color: var(--color-text, #374151);
   flex: 1;
-  transition:
-    opacity 0.2s ease,
-    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.3s ease;
+  transition: opacity 0.2s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -159,9 +157,7 @@
   font-size: 12px;
   font-weight: 600;
   color: #ffffff;
-  transition:
-    opacity 0.2s ease,
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .badgeCollapsed {
@@ -185,4 +181,51 @@
     width: 100%;
     height: 100%;
   }
+}
+
+/* Sidebar group (collapsible sections) */
+.menuGroup {
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  padding-top: 8px;
+}
+
+.menuGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: background 0.15s ease;
+}
+
+.menuGroupHeader:hover {
+  background: var(--color-bg-layout, #f3f4f6);
+}
+
+.menuGroupHeaderActive {
+  color: var(--color-primary, #3d9970);
+}
+
+.menuGroupLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuGroupChevron {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  flex-shrink: 0;
+}
+
+.menuGroupItems {
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }

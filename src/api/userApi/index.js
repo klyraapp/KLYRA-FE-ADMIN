@@ -11,6 +11,10 @@ export const getUsers = (params = {}) => {
   return api.get(USERS_ENDPOINT, { params });
 };
 
+export const getAdmins = (params = {}) => {
+  return api.get(`${USERS_ENDPOINT}/admins`, { params });
+};
+
 export const getUserById = (id) => {
   return api.get(`${USERS_ENDPOINT}/${id}`);
 };

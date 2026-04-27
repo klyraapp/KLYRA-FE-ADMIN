@@ -8,8 +8,10 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useTheme } from "@/theme/ThemeProvider";
 import { Select, Switch } from "antd";
 import { useCallback, useMemo, useState } from "react";
-import SettingsCard from "../../components/Setttings/SettingsCard";
-import SettingsRow from "../../components/Setttings/SettingsRow";
+import SettingsCard from "../../components/Settings/SettingsCard";
+import SettingsRow from "../../components/Settings/SettingsRow";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import styles from "../../styles/settingsPage.module.css";
 
 const SettingsPage = () => {

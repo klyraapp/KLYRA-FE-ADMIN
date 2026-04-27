@@ -3,17 +3,37 @@
  * Dynamically renders settings cards based on the API response
  */
 
-import SettingsCard from "@/components/Setttings/SettingsCard";
-import SettingsRow from "@/components/Setttings/SettingsRow";
+import SettingsCard from "@/components/Settings/SettingsCard";
+import SettingsRow from "@/components/Settings/SettingsRow";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Button, InputNumber, Skeleton } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { humanizeKey } from "../helpers/formatHelpers";
 import { useAppSettings, useUpdateAppSettings } from "../hooks/useAppSettings";
 
+import usePermission from "@/hooks/usePermission";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import { Switch } from "antd";
 import BookingLimitOverrideInput from "./inputs/BookingLimitOverrideInput";
 import MultiDateInput from "./inputs/MultiDateInput";
+
+/**
+ * Mapping of setting group names to their respective view and update permissions.
+ */
+const SETTINGS_PERMISSION_MAP = {
+  priceSettings: {
+    view: PERMISSION_KEYS.VIEW_APP_PRICE_SETTINGS,
+    update: PERMISSION_KEYS.UPDATE_APP_PRICE_SETTINGS,
+  },
+  bookingCalenderSlotSettings: {
+    view: PERMISSION_KEYS.VIEW_APP_BOOKING_CALENDAR_SLOT_SETTINGS,
+    update: PERMISSION_KEYS.UPDATE_APP_BOOKING_CALENDAR_SLOT_SETTINGS,
+  },
+  cronSettings: {
+    view: PERMISSION_KEYS.VIEW_APP_CRON_SETTINGS,
+    update: PERMISSION_KEYS.UPDATE_APP_CRON_SETTINGS,
+  },
+};
 
 /**
  * Component for an individual settings group
@@ -21,8 +41,9 @@ import MultiDateInput from "./inputs/MultiDateInput";
  * @param {Object} props.settings - The settings object from API
  * @param {Function} props.onSave - Callback to save changes
  * @param {boolean} props.isUpdating - Loading state for save button
+ * @param {boolean} props.canUpdate - Whether the user has permission to update this group
  */
-const SettingGroup = ({ settings, onSave, isUpdating }) => {
+const SettingGroup = ({ settings, onSave, isUpdating, canUpdate }) => {
   const { t } = useTranslation();
   const [values, setValues] = useState(settings?.value || {});
 
@@ -33,14 +54,18 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
   }, [settings]);
 
   const handleChange = useCallback((key, value) => {
+    if (!canUpdate) return;
     setValues((prev) => ({
       ...prev,
       [key]: value,
     }));
-  }, []);
+  }, [canUpdate]);
 
   const handleSave = () => {
-    onSave(settings.id, { value: values });
+    const filteredValues = { ...values };
+    delete filteredValues.saturdayOff;
+    delete filteredValues.sundayOff;
+    onSave(settings.id, { value: filteredValues });
   };
 
   // Generic translation lookup or humanize fallback
@@ -63,10 +88,15 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
   };
 
   const renderInput = (key, value) => {
+    const commonProps = {
+      disabled: !canUpdate,
+    };
+
     // Boolean switches
-    if (typeof value === 'boolean' || ['sundayOff', 'saturdayOff'].includes(key)) {
+    if (typeof value === "boolean") {
       return (
         <Switch
+          {...commonProps}
           checked={value}
           onChange={(checked) => handleChange(key, checked)}
         />
@@ -78,6 +108,7 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
       case 'fullClosedDates':
         return (
           <MultiDateInput
+            {...commonProps}
             value={value}
             onChange={(val) => handleChange(key, val)}
           />
@@ -85,6 +116,7 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
       case 'maxBookingLimitOverride':
         return (
           <BookingLimitOverrideInput
+            {...commonProps}
             value={value}
             onChange={(val) => handleChange(key, val)}
           />
@@ -92,6 +124,7 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
       case 'maxBookingsLimitPerDay':
         return (
           <InputNumber
+            {...commonProps}
             value={value}
             onChange={(val) => handleChange(key, val)}
             style={{ width: "100%" }}
@@ -101,6 +134,7 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
       default:
         return (
           <InputNumber
+            {...commonProps}
             value={value}
             onChange={(val) => handleChange(key, val)}
             style={{ width: "100%" }}
@@ -112,26 +146,31 @@ const SettingGroup = ({ settings, onSave, isUpdating }) => {
 
   return (
     <SettingsCard title={getTitle(settings.name)}>
-      {Object.entries(values).map(([key, value]) => (
-        <SettingsRow key={key} label={getLabel(key)}>
-          {renderInput(key, value)}
-        </SettingsRow>
-      ))}
-      <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          type="primary"
-          onClick={handleSave}
-          loading={isUpdating}
-        >
-          {t("common.save")}
-        </Button>
-      </div>
+      {Object.entries(values)
+        .filter(([key]) => !["saturdayOff", "sundayOff"].includes(key))
+        .map(([key, value]) => (
+          <SettingsRow key={key} label={getLabel(key)}>
+            {renderInput(key, value)}
+          </SettingsRow>
+        ))}
+      {canUpdate && (
+        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            type="primary"
+            onClick={handleSave}
+            loading={isUpdating}
+          >
+            {t("common.save")}
+          </Button>
+        </div>
+      )}
     </SettingsCard>
   );
 };
 
 const AppSettingsSection = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const { data: appSettings, isLoading } = useAppSettings();
   const { mutate: updateSettings, isPending, variables } = useUpdateAppSettings();
 
@@ -151,16 +190,29 @@ const AppSettingsSection = () => {
     return null;
   }
 
+  // Filter groups based on view permissions
+  const visibleGroups = appSettings.filter((group) => {
+    const config = SETTINGS_PERMISSION_MAP[group.name];
+    if (!config) return true; // Default to visible if not explicitly mapped
+    return can(config.view);
+  });
+
   return (
     <>
-      {appSettings.map((group) => (
-        <SettingGroup
-          key={group.id}
-          settings={group}
-          onSave={handleSave}
-          isUpdating={isPending && variables?.id === group.id}
-        />
-      ))}
+      {visibleGroups.map((group) => {
+        const config = SETTINGS_PERMISSION_MAP[group.name];
+        const canUpdate = config ? can(config.update) : true;
+
+        return (
+          <SettingGroup
+            key={group.id}
+            settings={group}
+            onSave={handleSave}
+            isUpdating={isPending && variables?.id === group.id}
+            canUpdate={canUpdate}
+          />
+        );
+      })}
     </>
   );
 };

@@ -1,5 +1,6 @@
 import { userLogout } from "@/api/authApi";
 import { logout } from "@/redux/reducers/authSlice";
+import { clearPermissions } from "@/redux/reducers/permissionSlice";
 import { deleteCookie } from "@/utils/utils";
 import { LogoutOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ function LogoutButton() {
     mutate(null, {
       onSuccess: () => {
         dispatch(logout());
+        dispatch(clearPermissions());
         deleteCookie("access_token");
         deleteCookie("refresh_token");
         localStorage.removeItem("rememberedEmail");
@@ -24,6 +26,7 @@ function LogoutButton() {
       },
       onError: () => {
         dispatch(logout());
+        dispatch(clearPermissions());
         deleteCookie("access_token");
         deleteCookie("refresh_token");
         localStorage.removeItem("rememberedEmail");

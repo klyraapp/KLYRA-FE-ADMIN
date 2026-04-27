@@ -35,11 +35,15 @@ import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { getSafeValue, safeMap } from "@/utils/safeRendering";
 import { formatCurrency } from "@/utils/formatters";
 import { ExportOutlined } from "@ant-design/icons";
-import { useCallback, useMemo, useState } from "react";
+import usePermission from "@/hooks/usePermission";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 import styles from "@/styles/services-pricing.module.css";
-
+import { useState ,useMemo, useCallback} from "react";
 const ServicesPricingPage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const { getServicesColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -55,6 +59,10 @@ const ServicesPricingPage = () => {
     open: false,
   });
 
+  const canCreate = can(PERMISSION_KEYS.SERVICE_CREATE);
+  const canUpdate = can(PERMISSION_KEYS.SERVICE_UPDATE);
+  const canDelete = can(PERMISSION_KEYS.SERVICE_DELETE);
+
   const SERVICE_EDIT_FIELDS = useMemo(
     () => [
       {
@@ -68,7 +76,12 @@ const ServicesPricingPage = () => {
         rules: [{ required: true }],
         fullWidth: true,
       },
-      { name: "icon", label: t("fields.icon"), type: "icon-upload", fullWidth: true },
+      {
+        name: "icon",
+        label: t("fields.icon"),
+        type: "icon-upload",
+        fullWidth: true,
+      },
       { name: "displayOrder", label: t("fields.displayOrder"), type: "number" },
       {
         name: "isActive",
@@ -84,6 +97,78 @@ const ServicesPricingPage = () => {
         name: "allowOneTimeBookings",
         label: t("table.allowOneTime"),
         type: "switch",
+      },
+      {
+        name: "saturdayOn",
+        label: t("table.saturdayOn"),
+        type: "switch",
+        revalidateFieldsOnChange: ["saturdayOnPricePercentage"],
+      },
+      {
+        name: "saturdayOnPricePercentage",
+        label: t("table.saturdayOnPricePercentage"),
+        type: "number",
+        dependencies: ["saturdayOn"],
+        rules: [
+          ({ getFieldValue }) => ({
+            validator(_, value) {
+              if (!getFieldValue("saturdayOn")) {
+                return Promise.resolve();
+              }
+
+              if (value === undefined || value === null || value === "") {
+                return Promise.reject(
+                  new Error(t("messages.saturdayOnPriceRequired")),
+                );
+              }
+
+              const num = Number(value);
+              if (Number.isNaN(num) || num <= 0) {
+                return Promise.reject(
+                  new Error(t("messages.saturdayOnPriceRequired")),
+                );
+              }
+
+              return Promise.resolve();
+            },
+          }),
+        ],
+      },
+      {
+        name: "sundayOn",
+        label: t("table.sundayOn"),
+        type: "switch",
+        revalidateFieldsOnChange: ["sundayOnPricePercentage"],
+      },
+      {
+        name: "sundayOnPricePercentage",
+        label: t("table.sundayOnPricePercentage"),
+        type: "number",
+        dependencies: ["sundayOn"],
+        rules: [
+          ({ getFieldValue }) => ({
+            validator(_, value) {
+              if (!getFieldValue("sundayOn")) {
+                return Promise.resolve();
+              }
+
+              if (value === undefined || value === null || value === "") {
+                return Promise.reject(
+                  new Error(t("messages.sundayOnPriceRequired")),
+                );
+              }
+
+              const num = Number(value);
+              if (Number.isNaN(num) || num <= 0) {
+                return Promise.reject(
+                  new Error(t("messages.sundayOnPriceRequired")),
+                );
+              }
+
+              return Promise.resolve();
+            },
+          }),
+        ],
       },
       {
         name: "applyDrivingCharged",
@@ -103,14 +188,19 @@ const ServicesPricingPage = () => {
 
   const SERVICE_VIEW_FIELDS = useMemo(
     () => [
-      { name: "id", label: "ID" },
+      { name: "id", label: t("table.id") || "ID" },
       { name: "name", label: t("table.serviceName") },
       {
         name: "description",
         label: t("table.description"),
         fullWidth: true,
       },
-      { name: "icon", label: t("fields.icon"), type: "icon-upload", fullWidth: true },
+      {
+        name: "icon",
+        label: t("fields.icon"),
+        type: "icon-upload",
+        fullWidth: true,
+      },
       { name: "displayOrder", label: t("fields.displayOrder"), type: "number" },
       {
         name: "isActive",
@@ -126,6 +216,26 @@ const ServicesPricingPage = () => {
         name: "allowOneTimeBookings",
         label: t("table.allowOneTime"),
         type: "switch",
+      },
+      {
+        name: "saturdayOn",
+        label: t("table.saturdayOn"),
+        type: "switch",
+      },
+      {
+        name: "saturdayOnPricePercentage",
+        label: t("table.saturdayOnPricePercentage"),
+        type: "number",
+      },
+      {
+        name: "sundayOn",
+        label: t("table.sundayOn"),
+        type: "switch",
+      },
+      {
+        name: "sundayOnPricePercentage",
+        label: t("table.sundayOnPricePercentage"),
+        type: "number",
       },
       {
         name: "applyDrivingCharged",
@@ -161,12 +271,9 @@ const ServicesPricingPage = () => {
     useServicesAdmin(queryParams);
   const services = servicesResponse?.services || [];
   const totalCount = servicesResponse?.totalCount || 0;
-  const { mutate: deleteService, isPending: isDeleting } =
-    useDeleteService();
-  const { mutate: updateService, isPending: isUpdating } =
-    useUpdateService();
-  const { mutate: createService, isPending: isCreating } =
-    useCreateService();
+  const { mutate: deleteService, isPending: isDeleting } = useDeleteService();
+  const { mutate: updateService, isPending: isUpdating } = useUpdateService();
+  const { mutate: createService, isPending: isCreating } = useCreateService();
   const { data: pricingRulesPool = [] } = usePricingRulesList();
   const toast = useToast();
 
@@ -291,10 +398,43 @@ const ServicesPricingPage = () => {
     (values) => {
       const payload = { ...values };
 
-      const { allowRecurringBookings, allowOneTimeBookings, priceRuleIds } = payload;
+      const { priceRuleIds } = payload;
+
+      const hasValue = (value) =>
+        value !== undefined && value !== null && value !== "";
+      const toPositiveNumber = (value) => {
+        if (!hasValue(value)) return null;
+        const num = Number(value);
+        if (Number.isNaN(num) || num <= 0) return null;
+        return num;
+      };
+
+      const saturdayOnEnabled = Boolean(payload.saturdayOn);
+      const sundayOnEnabled = Boolean(payload.sundayOn);
+
+      payload.saturdayOn = saturdayOnEnabled;
+      payload.sundayOn = sundayOnEnabled;
+      payload.allowRecurringBookings = Boolean(payload.allowRecurringBookings);
+      payload.allowOneTimeBookings = Boolean(payload.allowOneTimeBookings);
+
+      const saturdayOnPrice = toPositiveNumber(
+        payload.saturdayOnPricePercentage,
+      );
+      const sundayOnPrice = toPositiveNumber(payload.sundayOnPricePercentage);
+
+      payload.saturdayOnPricePercentage = saturdayOnEnabled
+        ? saturdayOnPrice
+        : 0;
+      payload.sundayOnPricePercentage = sundayOnEnabled ? sundayOnPrice : 0;
+
+      if (hasValue(payload.displayOrder)) {
+        payload.displayOrder = Number(payload.displayOrder);
+      } else {
+        delete payload.displayOrder;
+      }
 
       // Validation: At least one toggle must be ON
-      if (!allowRecurringBookings && !allowOneTimeBookings) {
+      if (!payload.allowRecurringBookings && !payload.allowOneTimeBookings) {
         toast.error("messages.enableAtLeastOneBookingType");
         return;
       }
@@ -306,31 +446,35 @@ const ServicesPricingPage = () => {
       }
 
       // Validation: If both toggles are ON, ensure at least one of each rule type is selected
-      if (allowRecurringBookings && allowOneTimeBookings) {
+      if (payload.allowRecurringBookings && payload.allowOneTimeBookings) {
         const selectedRules = (priceRuleIds || [])
-          .map(id => pricingRulesPool.find(r => r.id === id))
+          .map((id) => pricingRulesPool.find((r) => r.id === id))
           .filter(Boolean);
-        
-        const hasRecurring = selectedRules.some(r => r.serviceType === "RECURRING");
-        const hasOneTime = selectedRules.some(r => r.serviceType === "ONE_TIME");
+
+        const hasRecurring = selectedRules.some(
+          (r) => r.serviceType === "RECURRING",
+        );
+        const hasOneTime = selectedRules.some(
+          (r) => r.serviceType === "ONE_TIME",
+        );
 
         if (!hasRecurring || !hasOneTime) {
           toast.error("messages.selectOneRecurringOneTime");
           return;
         }
-      } else if (allowRecurringBookings) {
+      } else if (payload.allowRecurringBookings) {
         const selectedRules = (priceRuleIds || [])
-          .map(id => pricingRulesPool.find(r => r.id === id))
+          .map((id) => pricingRulesPool.find((r) => r.id === id))
           .filter(Boolean);
-        if (!selectedRules.some(r => r.serviceType === "RECURRING")) {
+        if (!selectedRules.some((r) => r.serviceType === "RECURRING")) {
           toast.error("messages.selectOneRecurring");
           return;
         }
-      } else if (allowOneTimeBookings) {
+      } else if (payload.allowOneTimeBookings) {
         const selectedRules = (priceRuleIds || [])
-          .map(id => pricingRulesPool.find(r => r.id === id))
+          .map((id) => pricingRulesPool.find((r) => r.id === id))
           .filter(Boolean);
-        if (!selectedRules.some(r => r.serviceType === "ONE_TIME")) {
+        if (!selectedRules.some((r) => r.serviceType === "ONE_TIME")) {
           toast.error("messages.selectOneOneTime");
           return;
         }
@@ -349,7 +493,14 @@ const ServicesPricingPage = () => {
         createService(payload, { onSuccess: closeModal });
       }
     },
-    [modalState, updateService, createService, closeModal, toast, pricingRulesPool],
+    [
+      modalState,
+      updateService,
+      createService,
+      closeModal,
+      toast,
+      pricingRulesPool,
+    ],
   );
 
   const columns = useMemo(
@@ -360,8 +511,10 @@ const ServicesPricingPage = () => {
         StatusBadge,
         ActionMenu,
         formatCurrency,
+        canUpdate,
+        canDelete,
       ),
-    [getServicesColumns, handleRowAction],
+    [getServicesColumns, handleRowAction, canUpdate, canDelete],
   );
 
   const headerActions = (
@@ -374,16 +527,16 @@ const ServicesPricingPage = () => {
       >
         <ExportOutlined className={styles.exportIcon} />
       </button>
-      <PrimaryButton
-        textKey="buttons.addServices"
-        onClick={handleAddService}
-      >
-        {t("buttons.addServices")}
-      </PrimaryButton>
+      <PermissionGuard permission={PERMISSION_KEYS.SERVICE_CREATE}>
+        <PrimaryButton textKey="buttons.addServices" onClick={handleAddService}>
+          {t("buttons.addServices")}
+        </PrimaryButton>
+      </PermissionGuard>
     </>
   );
 
   return (
+    <PageGuard permission={PERMISSION_KEYS.SERVICE_READ}>
     <div className={styles.pageContainer}>
       <PageHeader
         titleKey="pages.services.title"
@@ -402,8 +555,8 @@ const ServicesPricingPage = () => {
                 subtitle={card?.planName}
                 price={card?.price}
                 status={card?.status}
-                onEdit={() => handleCardEdit(card)}
-                onDelete={() => handleCardDelete(card)}
+                onEdit={canUpdate ? () => handleCardEdit(card) : undefined}
+                onDelete={canDelete ? () => handleCardDelete(card) : undefined}
               />
             ))}
           </div>
@@ -427,16 +580,12 @@ const ServicesPricingPage = () => {
         defaultPageSize={10}
         loading={isLoading}
         pagination={{
-          current:
-            Math.floor(pagination.skip / pagination.take) + 1,
+          current: Math.floor(pagination.skip / pagination.take) + 1,
           pageSize: pagination.take,
           total: totalCount,
         }}
         onChange={(paginationConfig) => {
-          if (
-            paginationConfig?.current &&
-            paginationConfig?.pageSize
-          ) {
+          if (paginationConfig?.current && paginationConfig?.pageSize) {
             handlePageChange(
               paginationConfig.current,
               paginationConfig.pageSize,
@@ -458,6 +607,7 @@ const ServicesPricingPage = () => {
             <DetailSection
               sections={createPricingRulesSection(
                 modalState.data.pricingRules,
+                t
               )}
             />
           )}
@@ -465,6 +615,7 @@ const ServicesPricingPage = () => {
           <DetailSection
             sections={createExtraServicesSection(
               modalState.data.extraServices,
+              t
             )}
           />
         )}
@@ -492,6 +643,8 @@ const ServicesPricingPage = () => {
           applyDrivingCharged: false,
           allowRecurringBookings: false,
           allowOneTimeBookings: false,
+          saturdayOn: false,
+          sundayOn: false,
         }}
         fields={SERVICE_EDIT_FIELDS}
         mode="edit"
@@ -515,6 +668,7 @@ const ServicesPricingPage = () => {
         getData={fetchServicesForExport}
       />
     </div>
+    </PageGuard>
   );
 };
 

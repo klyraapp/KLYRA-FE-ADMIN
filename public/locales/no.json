@@ -23,12 +23,15 @@
     "all": "Alle",
     "of": "av",
     "items": "elementer",
-    "unknown": "Ukjent"
+    "unknown": "Ukjent",
+    "selectAll": "Velg alle",
+    "list": "Liste",
+    "dates": "Datoer"
   },
   "status": {
     "active": "Aktiv",
     "inactive": "Inaktiv",
-    "pending": "Ventende",
+    "pending": "Venter betaling",
     "completed": "Fullført",
     "in_progress": "Under behandling",
     "confirmed": "Bekreftet",
@@ -76,7 +79,9 @@
     "additionalService": "Tilleggstjeneste",
     "deleteAdditionalService": "Slett tilleggstjeneste",
     "pricingRule": "Prisregel",
-    "deletePricingRule": "Slett prisregel"
+    "deletePricingRule": "Slett prisregel",
+    "role": "Rolle",
+    "user": "Bruker"
   },
   "export": {
     "dataRetention": "Datalagring (dager)",
@@ -132,6 +137,7 @@
     "extraServiceDeleteFailed": "Kunne ikke slette tilleggstjeneste",
     "settingsUpdated": "Innstillinger oppdatert",
     "settingsUpdateFailed": "Kunne ikke oppdatere innstillinger",
+    "leaveBlankToKeep": "La stå tomt for å beholde nåværende",
     "pricingRuleCreated": "Prisregel opprettet",
     "pricingRuleCreateFailed": "Kunne ikke opprette prisregel",
     "pricingRuleUpdated": "Prisregel oppdatert",
@@ -147,7 +153,9 @@
     "paymentMethodUpdateFailed": "Kunne ikke oppdatere betalingsmetode",
     "selectOneRecurringOneTime": "Du må velge minst én gjentakende og én engangs prisregel.",
     "selectOneRecurring": "Du må velge minst én gjentakende prisregel.",
-    "selectOneOneTime": "Du må velge minst én engangs prisregel."
+    "selectOneOneTime": "Du må velge minst én engangs prisregel.",
+    "saturdayOnPriceRequired": "Lørdagspris (%) er obligatorisk og må være større enn 0 når lørdag er aktivert.",
+    "sundayOnPriceRequired": "Søndagspris (%) er obligatorisk og må være større enn 0 når søndag er aktivert."
   },
   "resultPerPage": "Resultater per side",
   "createCode": "Opprett kode",
@@ -168,7 +176,10 @@
     "settings": "Innstillinger",
     "pricingRules": "Prisregler",
     "subscriptions": "Abonnementer",
-    "payments": "Betalinger"
+    "payments": "Betalinger",
+    "accessControl": "Tilgangskontroll",
+    "roles": "Roller",
+    "userRoles": "Brukerroller"
   },
   "pages": {
     "home": {
@@ -201,7 +212,41 @@
     },
     "bookings": {
       "title": "Bestillinger",
-      "subtitle": "Administrer alle dine rengjøringsbestillinger"
+      "subtitle": "Administrer alle dine rengjøringsbestillinger",
+      "fields": {
+        "adminNotes": "Admin-notater",
+        "bookingNumber": "Bestillingsnummer",
+        "status": "Status",
+        "paymentStatus": "Betalingsstatus",
+        "firstName": "Fornavn",
+        "lastName": "Etternavn",
+        "email": "E-post",
+        "phone": "Telefon",
+        "service": "Tjeneste",
+        "accommodationType": "Boligtype",
+        "numberOfBathrooms": "Antall bad",
+        "areaSqm": "Areal (kvm)",
+        "areaSqft": "Areal (sqft)",
+        "bookingDate": "Bestillingsdato",
+        "startTime": "Starttid",
+        "streetAddress": "Gateadresse",
+        "city": "By",
+        "postalCode": "Postnummer",
+        "country": "Land",
+        "freeParking": "Gratis parkering",
+        "parkingSurcharge": "Parkeringstillegg",
+        "hasPets": "Har kjæledyr",
+        "petSurcharge": "Kjæledyrtillegg",
+        "accessMethod": "Tilgangsmetode",
+        "subtotal": "Subtotal",
+        "taxRate": "MVA (%)",
+        "taxAmount": "MVA-beløp",
+        "discountAmount": "Rabattbeløp",
+        "totalAmount": "Totalbeløp",
+        "specialInstructions": "Spesielle instruksjoner",
+        "createdAt": "Opprettet dato",
+        "updatedAt": "Oppdatert dato"
+      }
     },
     "services": {
       "title": "Tjenester og priser",
@@ -256,15 +301,58 @@
       "subscription": "Abonnement",
       "detailSubtitle": "Vis alle bestillinger for dette abonnementet",
       "backToList": "Tilbake til abonnementer",
-      "expectedPrice": "Forventet pris for neste bestilling: {price}"
+      "expectedPrice": "Forventet pris for neste bestilling: {price}",
+      "sections": {
+        "details": "Abonnementsdetaljer",
+        "id": "ID",
+        "status": "Status",
+        "interval": "Intervall",
+        "nextScheduled": "Neste vask",
+        "lastNotification": "Siste varsel",
+        "createdAt": "Opprettet dato",
+        "noInfo": "Ingen abonnementsinformasjon tilgjengelig"
+      }
     },
     "payments": {
       "title": "Betalinger",
       "subtitle": "Administrer og overvåk alle betalingstransaksjoner",
       "payment": "Betaling"
+    },
+    "roles": {
+      "title": "Rollehåndtering",
+      "subtitle": "Administrer roller og deres tillatelser",
+      "addRole": "Legg til rolle",
+      "roleName": "Rollenavn",
+      "roleNamePlaceholder": "Skriv inn rollenavn",
+      "roleNameRequired": "Vennligst skriv inn et rollenavn",
+      "permissions": "Tillatelser",
+      "deleteTitle": "Slett rolle",
+      "id": "ID",
+      "permissionsCount": "Tillatelser",
+      "createdAt": "Opprettet dato"
+    },
+    "userRoles": {
+      "title": "Brukerrolletilordning",
+      "subtitle": "Tilordne og administrer roller for brukere",
+      "addUser": "Legg til ny bruker",
+      "deleteTitle": "Slett bruker",
+      "name": "Navn",
+      "email": "E-post",
+      "roles": "Rolle(r)",
+      "noRoles": "Ingen roller",
+      "viewRoles": "Vis roller",
+      "editRoles": "Rediger roller",
+      "userDetails": "Brukerdetaljer",
+      "firstName": "Fornavn",
+      "lastName": "Etternavn",
+      "selectRoles": "Tilordne roller",
+      "selectRolesPlaceholder": "Velg roller",
+      "overridePermissions": "Overstyr med direkte tillatelser",
+      "directPermissions": "Direkte tillatelser"
     }
   },
   "table": {
+    "id": "ID",
     "customerId": "Kunde-ID",
     "name": "Navn",
     "email": "E-post",
@@ -286,11 +374,19 @@
     "price": "Pris",
     "basePrice": "Grunnpris",
     "allowRecurring": "Tillat gjentakende bestillinger",
+    "sundayOn": "Søndag på",
+    "sundayOnPricePercentage": "Søndag On Pris (%)",
+    "saturdayOn": "Lørdag på",
+    "saturdayOnPricePercentage": "Lørdag On Pris (%)",
     "allowOneTime": "Tillat engangsbestillinger",
     "applyDrivingFee": "Bruk kjøregebyr",
     "code": "Kode",
     "discount": "Rabatt",
-    "discountType": "Rabatttype",
+    "discountType": "Rabatt-type",
+    "percentage": "Prosent",
+    "fixedAmount": "Fast beløp",
+    "maxUsageCount": "Maks bruksantall",
+    "maxUsagePerUser": "Maks bruk per bruker",
     "validFrom": "Gyldig fra",
     "validTo": "Gyldig til",
     "description": "Beskrivelse",
@@ -315,7 +411,18 @@
     "updatedAt": "Oppdatert tidspunkt",
     "userId": "Bruker-ID",
     "failureReason": "Feilårsak",
-    "lastNotificationSent": "Siste varsel sendt"
+    "lastNotificationSent": "Siste varsel sendt",
+    "adminNotes": "Admin-notater",
+    "extraServices": "Ekstratjenester",
+    "qty": "Antall",
+    "total": "Totalt",
+    "itemName": "Navn",
+    "order": "Rekkefølge",
+    "ruleType": "Regeltype",
+    "maxArea": "Maks areal",
+    "stepSize": "Trinnstørrelse",
+    "childRules": "Underregler",
+    "relatedService": "Relatert tjeneste"
   },
   "filters": {
     "searchPlaceholder": "Søk...",
@@ -369,11 +476,13 @@
     "alreadySelected": "Allerede valgt",
     "selectDate": "Velg dato",
     "addOverride": "Legg til overstyring",
-    "limit": "Grense"
+    "limit": "Grense",
+    "cronSettings": "Cron-innstillinger",
+    "recurringInvoicingDaysBeforeBooking": "Dager for gjentakende fakturering før booking"
   },
   "dashboard": {
     "totalBookings": "Totale bestillinger",
-    "pending": "Ventende",
+    "pending": "Venter betaling",
     "revenue": "Inntekt",
     "activeCustomers": "Aktive kunder",
     "serviceRequests": "Tjenesteforespørsler",

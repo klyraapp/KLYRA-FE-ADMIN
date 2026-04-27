@@ -29,7 +29,7 @@ const Header = ({ onMenuClick, onMobileMenuClick }) => {
   }, [onMenuClick]);
 
   const handleSettingsClick = useCallback(() => {
-    router.push("/setttings");
+    router.push("/settings");
   }, [router]);
 
   const handleLogout = useCallback(() => {

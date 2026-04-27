@@ -9,3 +9,4 @@ export const createRole = (data) => api.post("/roles", data);
 export const updateRole = (params, data) => api.patch(`/roles/${params}`, data);
 
 export const deleteRole = (params) => api.delete(`/roles/${params}`);
+export const getRolePermissions = (roleId) => api.get(`/permissions/${roleId}`);

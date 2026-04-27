@@ -1,195 +1,249 @@
-import { createRole, updateRole } from "@/api/rolesApi";
-import Config from "@/components/common/Cofig";
-import { buttonTheme } from "@/features/auth";
-import { getPermissionEnum } from "@/utils/utils";
-import { UserOutlined } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
-import { Button, Checkbox, Form, Input, Modal } from "antd";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import { getTranslation } from "../../../translations";
+/**
+ * CreateRole Modal Component
+ * Creates or edits a role with grouped permissions UI.
+ * Uses shared DetailModal for consistency.
+ */
 
-const CreateRoles = ({
-  open,
-  handleCloseModal,
-  editRolesData = {},
-  fetchData,
-  permissionsData,
+import DetailModal from "../common/DetailModal";
+import { groupPermissionsByResource } from "@/utils/groupPermissions";
+import { useTranslation } from "@/hooks/useTranslation";
+import { Checkbox } from "antd";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import PropTypes from "prop-types";
+import { memo } from "react";
+import styles from "@/styles/RoleManagement.module.css";
+
+const PermissionGroup = memo(({
+  group,
+  selectedIds,
+  onToggle,
+  onToggleGroup,
 }) => {
-  const [form] = Form.useForm();
+  const viewPermission = group.permissions.find(
+    (p) => p.action === "read" || p.action === "read_all"
+  );
+  
+  const isViewSelected = viewPermission ? selectedIds.includes(viewPermission.id) : false;
 
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [prevPermissions, setPrevPermissions] = useState([]);
-  const [previousPermissionIds, setPreviousPermissionIds] = useState([]);
-  const { profileData } = useSelector((state) => state.users);
+  const allSelected = group.permissions.every((p) =>
+    selectedIds.includes(p.id),
+  );
 
-  const { mutate: mutateCreate } = useMutation({
-    mutationFn: createRole,
-  });
+  const someSelected = group.permissions.some((p) =>
+    selectedIds.includes(p.id),
+  );
 
-  const { mutate: mutateUpdate } = useMutation({
-    mutationFn: (data) => updateRole(editRolesData?.id, data),
-  });
-
-  useEffect(() => {
-    if (editRolesData?.id) {
-      const rolePermissions = editRolesData?.rolePermission?.map(
-        (item) => item?.permissionId,
-      );
-      setPreviousPermissionIds(rolePermissions);
-      form.setFieldsValue({
-        name: editRolesData?.name,
-      });
-      setSelectedPermissions([...rolePermissions]);
-      if (permissionsData?.length === rolePermissions?.length) {
-        setSelectAll(true);
-      } else {
-        setSelectAll(false);
-      }
-      setPrevPermissions([...selectedPermissions]);
-    }
-
-    return () => {
-      form.setFieldsValue({
-        name: "",
-      });
-      setSelectedPermissions([]);
-      setSelectAll(false);
-    };
-  }, [editRolesData, permissionsData]);
-
-  const onFinish = (formData) => {
-    let newPermissions = selectedPermissions?.filter(
-      (x) => !prevPermissions?.includes(x),
-    );
-
-    const formValues = {
-      name: formData?.name,
-    };
-
-    if (editRolesData?.id) {
-      formValues.deletePermissions = previousPermissionIds?.filter(
-        (value) => !newPermissions?.includes(value),
-      );
-      formValues.newPermissions = newPermissions;
-    } else {
-      formValues.permissions = selectedPermissions;
-    }
-
-    const mutateFunction = editRolesData?.id ? mutateUpdate : mutateCreate;
-
-    mutateFunction(formValues, {
-      onSuccess: (res) => {
-        toast.success(res?.data?.message);
-        fetchData();
-
-        handleCloseModal();
-      },
-      onError: (err) => {
-        toast.error(err?.response?.data?.message);
-        handleCloseModal();
-      },
-    });
-  };
-
-  const handlePermissionChange = (permissionKey, checked) => {
-    if (checked) {
-      setSelectedPermissions((prevSelectedPermissions) => [
-        ...prevSelectedPermissions,
-        permissionKey,
-      ]);
-      setSelectAll(selectedPermissions?.length + 1 === permissionsData?.length);
-    } else {
-      setSelectedPermissions((prevSelectedPermissions) =>
-        prevSelectedPermissions?.filter((key) => key !== permissionKey),
-      );
-      setSelectAll(false);
-    }
-  };
-
-  const handleCheckAllChange = (checked) => {
-    setSelectAll(checked);
-    if (checked) {
-      setSelectedPermissions(
-        permissionsData?.map((permission) => permission?.id),
-      );
-    } else {
-      setSelectedPermissions([]);
-    }
+  const handleChildToggle = (permId, checked, action) => {
+    // If we're toggling view off, we should ideally deselect others too
+    // But the parent handleTogglePermission will handle the logic if we pass it correctly
+    // or we can handle it here and call onToggle multiple times
+    onToggle(permId, checked, group, action);
   };
 
   return (
-    <Modal
-      title={
-        editRolesData?.name
-          ? getTranslation(profileData?.userLanguage, "update_roles")
-          : getTranslation(profileData?.userLanguage, "create_roles")
-      }
-      open={open}
-      onOk={handleCloseModal}
-      onCancel={handleCloseModal}
-      footer={null}
-    >
-      <Form name="createRoles" form={form} onFinish={onFinish}>
-        <Form.Item
-          name="name"
-          rules={[{ required: true, message: "Please enter your name" }]}
+    <div className={styles.permissionGroup}>
+      <div className={styles.permissionGroupHeader}>
+        <Checkbox
+          checked={allSelected}
+          indeterminate={!allSelected && someSelected}
+          onChange={(e) => onToggleGroup(group, e.target.checked)}
         >
-          <Input
-            style={{ padding: "10px" }}
-            placeholder={getTranslation(profileData?.userLanguage, "name")}
-            suffix={<UserOutlined />}
-          />
-        </Form.Item>
-        <Form.Item>
-          <Checkbox
-            onChange={(e) => handleCheckAllChange(e.target.checked)}
-            checked={selectAll}
-          >
-            Select All
-          </Checkbox>
-          <div>
-            {permissionsData?.map((permission) => (
-              <Checkbox
-                name="permissions"
-                key={permission?.id}
-                onChange={(e) =>
-                  handlePermissionChange(permission?.id, e?.target?.checked)
-                }
-                checked={selectedPermissions.includes(permission?.id)}
-              >
-                {getPermissionEnum(permission?.name)}
-              </Checkbox>
-            ))}
-          </div>
-        </Form.Item>
-        <Form.Item>
-          <Config theme={buttonTheme}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
+          <span className={styles.permissionGroupTitle}>
+            {group.label}
+          </span>
+        </Checkbox>
+      </div>
+      <div className={styles.permissionGroupItems}>
+        {group.permissions.map((perm) => {
+          const isViewAction = perm.action === "read" || perm.action === "read_all";
+          const isDisabled = !isViewAction && !isViewSelected;
+
+          return (
+            <Checkbox
+              key={perm.id}
+              checked={selectedIds.includes(perm.id)}
+              disabled={isDisabled}
+              onChange={(e) => handleChildToggle(perm.id, e.target.checked, perm.action)}
             >
-              <Button
-                style={{ width: "100%", background: "#6286d3", margin: "0" }}
-                type="primary"
-                htmlType="submit"
-                data-testid="role-create-button"
-              >
-                {editRolesData?.name
-                  ? getTranslation(profileData?.userLanguage, "update_role")
-                  : getTranslation(profileData?.userLanguage, "create_role")}
-              </Button>
-            </div>
-          </Config>
-        </Form.Item>
-      </Form>
-    </Modal>
+              {perm.actionLabel}
+            </Checkbox>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+PermissionGroup.displayName = "PermissionGroup";
+
+const CreateRoleModal = ({
+  open,
+  onClose,
+  editData,
+  permissionsData,
+  onSubmit,
+  isSubmitting,
+}) => {
+  const { t } = useTranslation();
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const isEditMode = Boolean(editData?.id);
+
+  const groupedPermissions = useMemo(
+    () => groupPermissionsByResource(permissionsData || []),
+    [permissionsData],
+  );
+
+  useEffect(() => {
+    if (open) {
+      if (isEditMode) {
+        const rolePermissions = (editData?.rolePermission || []).map(
+          (item) => item?.permissionId,
+        );
+        setSelectedPermissions(rolePermissions);
+      } else {
+        setSelectedPermissions([]);
+      }
+    }
+  }, [open, isEditMode, editData]);
+
+  const handleTogglePermission = useCallback((permId, checked, group, action) => {
+    setSelectedPermissions((prev) => {
+      const isViewAction = action === "read" || action === "read_all";
+      
+      if (!checked) {
+        let newSelection = prev.filter((id) => id !== permId);
+        
+        // If unselecting View, also unselect all CRUD in this group
+        if (isViewAction) {
+          const groupPermIds = group.permissions.map(p => p.id);
+          newSelection = newSelection.filter(id => !groupPermIds.includes(id));
+        }
+        
+        return newSelection;
+      }
+      
+      return [...prev, permId];
+    });
+  }, []);
+
+  const handleToggleGroup = useCallback((group, checked) => {
+    const groupIds = group.permissions.map((p) => p.id);
+    setSelectedPermissions((prev) => {
+      if (checked) {
+        const newIds = groupIds.filter((id) => !prev.includes(id));
+        return [...prev, ...newIds];
+      }
+      // Uncheck all in group
+      return prev.filter((id) => !groupIds.includes(id));
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(
+    (checked) => {
+      if (checked) {
+        const allIds = (permissionsData || []).map((p) => p.id);
+        setSelectedPermissions(allIds);
+      } else {
+        setSelectedPermissions([]);
+      }
+    },
+    [permissionsData],
+  );
+
+  const allSelected = useMemo(() => {
+    if (!permissionsData?.length) return false;
+    return permissionsData.length === selectedPermissions.length;
+  }, [permissionsData, selectedPermissions]);
+
+  const someSelected = selectedPermissions.length > 0 && !allSelected;
+
+  const handleSave = useCallback(
+    (values) => {
+      const finalPermissions = selectedPermissions;
+
+      const payload = {
+        name: values.name,
+      };
+
+      if (isEditMode) {
+        const previousIds = (editData?.rolePermission || []).map(
+          (item) => item?.permissionId,
+        );
+        payload.newPermissions = finalPermissions.filter(
+          (id) => !previousIds.includes(id),
+        );
+        payload.deletePermissions = previousIds.filter(
+          (id) => !finalPermissions.includes(id),
+        );
+      } else {
+        payload.permissions = finalPermissions;
+      }
+
+      onSubmit(payload);
+    },
+    [isEditMode, editData, selectedPermissions, onSubmit, permissionsData],
+  );
+
+  const fields = useMemo(() => [
+    {
+      name: "name",
+      label: t("pages.roles.roleName") || "Role Name",
+      placeholder: t("pages.roles.roleNamePlaceholder") || "Enter role name",
+      rules: [{ required: true, message: t("pages.roles.roleNameRequired") || "Required" }],
+      fullWidth: true,
+    },
+  ], [t]);
+
+  return (
+    <DetailModal
+      open={open}
+      onClose={onClose}
+      onSave={handleSave}
+      title={t("modals.role") || "Role"}
+      data={editData}
+      fields={fields}
+      mode={isEditMode ? "edit" : "edit"}
+      isCreateMode={!isEditMode}
+      loading={isSubmitting}
+    >
+      <div className={styles.permissionsSection}>
+        <div className={styles.permissionsSectionHeader}>
+          <h4 className={styles.permissionsSectionTitle}>
+            {t("pages.roles.permissions") || "Permissions"}
+          </h4>
+          <Checkbox
+            checked={allSelected}
+            indeterminate={someSelected}
+            onChange={(e) => handleSelectAll(e.target.checked)}
+          >
+            {t("common.selectAll") || "Select All"}
+          </Checkbox>
+        </div>
+
+        <div className={styles.permissionGroups}>
+          {groupedPermissions.map((group) => (
+            <PermissionGroup
+              key={group.resource}
+              group={group}
+              selectedIds={selectedPermissions}
+              onToggle={handleTogglePermission}
+              onToggleGroup={handleToggleGroup}
+            />
+          ))}
+        </div>
+      </div>
+    </DetailModal>
   );
 };
 
-export default CreateRoles;
+CreateRoleModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  editData: PropTypes.object,
+  permissionsData: PropTypes.arrayOf(PropTypes.object),
+  onSubmit: PropTypes.func.isRequired,
+  isSubmitting: PropTypes.bool,
+};
+
+export default memo(CreateRoleModal);
+

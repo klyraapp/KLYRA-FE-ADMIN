@@ -134,13 +134,14 @@ export const useDeleteBooking = () => {
   });
 };
 
-export const useDisabledDates = (options = {}) => {
+export const useDisabledDates = (serviceId, options = {}) => {
   return useQuery({
-    queryKey: ["disabledDates"],
+    queryKey: ["disabledDates", serviceId],
     queryFn: async () => {
-      const response = await getDisabledDates();
+      const response = await getDisabledDates(serviceId);
       return response?.data || { disabledDates: [], sundayOff: false, saturdayOff: false };
     },
+    enabled: Boolean(serviceId),
     staleTime: 30 * 60 * 1000, // 30 mins
     ...options,
   });

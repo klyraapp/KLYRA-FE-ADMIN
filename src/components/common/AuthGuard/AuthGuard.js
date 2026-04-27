@@ -2,11 +2,15 @@
  * AuthGuard Component
  * Protects routes from unauthorized access
  * Redirects to login if not authenticated
+ * Populates RBAC permission state on successful auth
  */
 
 import { meAuth } from "@/api/authApi";
 import { login, logout } from "@/redux/reducers/authSlice";
+import { setPermissions, clearPermissions } from "@/redux/reducers/permissionSlice";
 import { setProfileData } from "@/redux/reducers/userState";
+import { normalizePermissions } from "@/utils/normalizePermissions";
+import { SUPER_ADMIN_ROLE } from "@/utils/permissionConstants";
 import { getAccessTokenCookie } from "@/utils/axiosMiddleware";
 import { deleteCookie } from "@/utils/utils";
 import { Spin } from "antd";
@@ -20,6 +24,28 @@ const PUBLIC_ROUTES = [
   "/forgot-password",
   "/reset-password",
 ];
+
+/**
+ * Extracts and dispatches normalized permissions from the /me API response.
+ */
+const dispatchUserPermissions = (dispatch, userData) => {
+  const rawPermissions = userData?.permissions || [];
+  const userRoles = (userData?.roles || []).map((role) => role?.name || "");
+  const isSuperAdmin = userRoles.some(
+    (roleName) => roleName.toLowerCase() === SUPER_ADMIN_ROLE,
+  );
+
+  const normalized = normalizePermissions(rawPermissions);
+  const normalizedStrings = normalized.map((p) => p.normalized);
+
+  dispatch(
+    setPermissions({
+      normalizedPermissions: normalizedStrings,
+      userRoles,
+      isSuperAdmin,
+    }),
+  );
+};
 
 const AuthGuard = ({ children }) => {
   const router = useRouter();
@@ -37,6 +63,7 @@ const AuthGuard = ({ children }) => {
 
     if (!accessToken) {
       dispatch(logout());
+      dispatch(clearPermissions());
       setIsAuthorized(false);
       setIsLoading(false);
       return;
@@ -59,13 +86,17 @@ const AuthGuard = ({ children }) => {
             userLanguage: userData.languagePreference || "en",
           }),
         );
+
+        dispatchUserPermissions(dispatch, userData);
         setIsAuthorized(true);
       } else {
         dispatch(logout());
+        dispatch(clearPermissions());
         setIsAuthorized(false);
       }
     } catch {
       dispatch(logout());
+      dispatch(clearPermissions());
       deleteCookie("access_token");
       deleteCookie("refresh_token");
       setIsAuthorized(false);
@@ -81,6 +112,9 @@ const AuthGuard = ({ children }) => {
       return;
     }
 
+    // Reset state when transitioning to a private route
+    setIsAuthorized(false);
+    setIsLoading(true);
     validateAuth();
   }, [isPublicRoute, validateAuth]);
 

@@ -9,13 +9,20 @@ import AntTable from "@/components/AntTable/AntTable";
 import DetailModal from "@/components/common/DetailModal";
 import DetailSection from "@/components/common/DetailSection";
 import { createSubscriptionSections, createBookingExtraServicesSections } from "@/components/common/DetailSection/sectionHelpers";
+import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
+import ViewToggle, { VIEW_LIST, VIEW_CALENDAR } from "@/components/common/ViewToggle";
+import BookingsCalendar from "@/components/common/BookingsCalendar";
+import { Pagination } from "antd";
 import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageHeader from "@/components/PageHeader/PageHeader";
+import PageGuard from "@/components/common/RBAC/PageGuard";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
 import { useBookings, useDisabledDates, useUpdateBooking } from "@/hooks/useBookings";
+import usePermission from "@/hooks/usePermission";
 import useTableColumns from "@/hooks/useTableColumns";
 import { useTranslation } from "@/hooks/useTranslation";
 import styles from "@/styles/subscriptions.module.css";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import {
   ALLOWED_STATUS_TRANSITIONS,
   BookingStatus,
@@ -32,52 +39,103 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 
-const BOOKING_FIELDS = [
-  { name: "bookingNumber", label: "Booking Number" },
-  { name: "status", label: "Status" },
-  { name: "paymentStatus", label: "Payment Status" },
-  { name: "contactFirstName", label: "First Name" },
-  { name: "contactLastName", label: "Last Name" },
-  { name: "contactEmail", label: "Email" },
-  { name: "contactPhone", label: "Phone" },
-  { name: ["service", "name"], label: "Service" },
-  { name: "accommodationType", label: "Accommodation Type" },
-  { name: "numberOfBathrooms", label: "Number of Bathrooms" },
-  { name: "areaSqm", label: "Area (sqm)" },
-  { name: "areaSqft", label: "Area (sqft)" },
-  { name: "bookingDate", label: "Booking Date" },
-  { name: "startTime", label: "Start Time" },
-  { name: "serviceStreetAddress", label: "Street Address", fullWidth: true },
-  { name: "serviceCity", label: "City" },
-  { name: "servicePostalCode", label: "Postal Code" },
-  { name: "serviceCountry", label: "Country" },
-  { name: "hasFreeParking", label: "Free Parking", type: "boolean" },
-  { name: "parkingSurcharge", label: "Parking Surcharge" },
-  { name: "hasPets", label: "Has Pets", type: "boolean" },
-  { name: "petSurcharge", label: "Pet Surcharge" },
-  { name: "accessMethod", label: "Access Method" },
-  { name: "subtotal", label: "Subtotal" },
-  { name: "taxRate", label: "Tax Rate (%)" },
-  { name: "taxAmount", label: "Tax Amount" },
-  { name: "discountAmount", label: "Discount Amount" },
-  { name: "totalAmount", label: "Total Amount" },
-  {
-    name: "specialInstructions",
-    label: "Special Instructions",
-    type: "textarea",
-    fullWidth: true,
-  },
-  { name: "createdAt", label: "Created At", fullWidth: true },
-  { name: "updatedAt", label: "Updated At", fullWidth: true },
-];
-
 const SubscriptionDetailPage = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query;
   const subscriptionId = id ? Number(id) : null;
 
+  const BOOKING_FIELDS = useMemo(
+    () => [
+      { name: "bookingNumber", label: t("pages.bookings.fields.bookingNumber") },
+      { name: "status", label: t("pages.bookings.fields.status") },
+      { name: "paymentStatus", label: t("pages.bookings.fields.paymentStatus") },
+      { name: "contactFirstName", label: t("pages.bookings.fields.firstName") },
+      { name: "contactLastName", label: t("pages.bookings.fields.lastName") },
+      { name: "contactEmail", label: t("pages.bookings.fields.email") },
+      { name: "contactPhone", label: t("pages.bookings.fields.phone") },
+      { name: ["service", "name"], label: t("pages.bookings.fields.service") },
+      {
+        name: "accommodationType",
+        label: t("pages.bookings.fields.accommodationType"),
+      },
+      {
+        name: "numberOfBathrooms",
+        label: t("pages.bookings.fields.numberOfBathrooms"),
+      },
+      { name: "areaSqm", label: t("pages.bookings.fields.areaSqm") },
+      { name: "areaSqft", label: t("pages.bookings.fields.areaSqft") },
+      { name: "bookingDate", label: t("pages.bookings.fields.bookingDate") },
+      { name: "startTime", label: t("pages.bookings.fields.startTime") },
+      {
+        name: "serviceStreetAddress",
+        label: t("pages.bookings.fields.streetAddress"),
+        fullWidth: true,
+      },
+      { name: "serviceCity", label: t("pages.bookings.fields.city") },
+      {
+        name: "servicePostalCode",
+        label: t("pages.bookings.fields.postalCode"),
+      },
+      { name: "serviceCountry", label: t("pages.bookings.fields.country") },
+      {
+        name: "hasFreeParking",
+        label: t("pages.bookings.fields.freeParking"),
+        type: "boolean",
+      },
+      {
+        name: "parkingSurcharge",
+        label: t("pages.bookings.fields.parkingSurcharge"),
+      },
+      {
+        name: "hasPets",
+        label: t("pages.bookings.fields.hasPets"),
+        type: "boolean",
+      },
+      {
+        name: "petSurcharge",
+        label: t("pages.bookings.fields.petSurcharge"),
+      },
+      { name: "accessMethod", label: t("pages.bookings.fields.accessMethod") },
+      { name: "subtotal", label: t("pages.bookings.fields.subtotal") },
+      { name: "taxRate", label: t("pages.bookings.fields.taxRate") },
+      { name: "taxAmount", label: t("pages.bookings.fields.taxAmount") },
+      {
+        name: "discountAmount",
+        label: t("pages.bookings.fields.discountAmount"),
+      },
+      { name: "totalAmount", label: t("pages.bookings.fields.totalAmount") },
+      {
+        name: "specialInstructions",
+        label: t("pages.bookings.fields.specialInstructions"),
+        type: "textarea",
+        fullWidth: true,
+      },
+      {
+        name: "createdAt",
+        label: t("pages.bookings.fields.createdAt"),
+        fullWidth: true,
+      },
+      {
+        name: "updatedAt",
+        label: t("pages.bookings.fields.updatedAt"),
+        fullWidth: true,
+      },
+      {
+        name: "adminNotes",
+        label: t("pages.bookings.fields.adminNotes"),
+        type: "textarea",
+        fullWidth: true,
+      },
+    ],
+    [t]
+  );
+
   const { getSubscriptionBookingsColumns } = useTableColumns();
+  const { can } = usePermission();
+
+  const canUpdate = can(PERMISSION_KEYS.BOOKING_UPDATE);
+  const [activeView, setActiveView] = useState(VIEW_LIST);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
@@ -156,7 +214,11 @@ const SubscriptionDetailPage = () => {
     );
   }, [modalState.data?.status, t]);
 
-  const { data: disabledData } = useDisabledDates();
+  const editingServiceId =
+    modalState.type === "edit"
+      ? modalState.data?.serviceId || modalState.data?.service?.id
+      : null;
+  const { data: disabledData } = useDisabledDates(editingServiceId);
 
   const disabledDate = useCallback((current) => {
     if (!current) return false;
@@ -184,6 +246,11 @@ const SubscriptionDetailPage = () => {
         type: "select",
         options: statusOptions,
         rules: [{ required: true, message: t("table.status") }],
+      },
+      {
+        name: "adminNotes",
+        label: t("pages.bookings.fields.adminNotes") || "Admin Notes",
+        type: "textarea",
       },
     ],
     [statusOptions, t, disabledDate],
@@ -246,6 +313,10 @@ const SubscriptionDetailPage = () => {
           payload.status = values.status;
         }
 
+        if (values.adminNotes !== undefined && values.adminNotes !== originalData.adminNotes) {
+          payload.adminNotes = values.adminNotes;
+        }
+
         if (Object.keys(payload).length > 0) {
           updateBooking(
             { id: modalState.data.id, data: payload },
@@ -263,6 +334,12 @@ const SubscriptionDetailPage = () => {
     router.push("/subscriptions");
   }, [router]);
 
+  const handleViewChange = useCallback((view) => {
+    setActiveView(view);
+  }, []);
+
+  const currentPage = Math.floor(pagination.skip / pagination.take) + 1;
+
   const columns = useMemo(
     () =>
       getSubscriptionBookingsColumns(
@@ -276,8 +353,9 @@ const SubscriptionDetailPage = () => {
         formatTime,
         formatBookingStatus,
         firstBookingId,
+        canUpdate,
       ),
-    [getSubscriptionBookingsColumns, handleRowAction, firstBookingId],
+    [getSubscriptionBookingsColumns, handleRowAction, firstBookingId, canUpdate],
   );
 
   const headerActions = (
@@ -300,40 +378,81 @@ const SubscriptionDetailPage = () => {
         actions={headerActions}
       />
 
-      <FiltersBar
-        searchPlaceholder={t("filters.searchPlaceholder")}
-        onSearch={handleSearch}
-        onStatusChange={handleStatusChange}
-        onDateChange={handleDateChange}
-        showStatusFilter
-        showDateFilter
-        statusOptions={BOOKING_STATUS_OPTIONS}
-      />
+      <div className={styles.viewToolbar}>
+        <div className={styles.filtersWrapper}>
+          <FiltersBar
+            searchPlaceholder={t("filters.searchPlaceholder")}
+            onSearch={handleSearch}
+            onStatusChange={handleStatusChange}
+            onDateChange={handleDateChange}
+            showStatusFilter
+            showDateFilter
+            statusOptions={BOOKING_STATUS_OPTIONS}
+          />
+        </div>
+        <ViewToggle
+          activeView={activeView}
+          onViewChange={handleViewChange}
+        />
+      </div>
 
-      <AntTable
-        columns={columns}
-        dataSource={bookings}
-        rowKey="id"
-        showPagination
-        defaultPageSize={10}
-        loading={isLoading}
-        rowClassName={(record) =>
-          record.id === firstBookingId && record.status === "CONFIRMED" ? styles.highlightedRow : ""
-        }
-        pagination={{
-          current: Math.floor(pagination.skip / pagination.take) + 1,
-          pageSize: pagination.take,
-          total: totalCount,
-        }}
-        onChange={(paginationConfig) => {
-          if (paginationConfig?.current && paginationConfig?.pageSize) {
-            handlePageChange(
-              paginationConfig.current,
-              paginationConfig.pageSize,
-            );
-          }
-        }}
-      />
+      <ErrorBoundary>
+        {activeView === VIEW_LIST && (
+          <AntTable
+            columns={columns}
+            dataSource={bookings}
+            rowKey="id"
+            showPagination
+            defaultPageSize={10}
+            loading={isLoading}
+            rowClassName={(record) =>
+              record.id === firstBookingId && record.status === "CONFIRMED" ? styles.highlightedRow : ""
+            }
+            pagination={{
+              current: currentPage,
+              pageSize: pagination.take,
+              total: totalCount,
+            }}
+            onChange={(paginationConfig) => {
+              if (paginationConfig?.current && paginationConfig?.pageSize) {
+                handlePageChange(
+                  paginationConfig.current,
+                  paginationConfig.pageSize,
+                );
+              }
+            }}
+          />
+        )}
+
+        {activeView === VIEW_CALENDAR && (
+          <>
+            <BookingsCalendar
+              bookings={bookings}
+              loading={isLoading}
+              onAction={handleRowAction}
+              canEdit={canUpdate}
+              totalCount={totalCount}
+              // Only first booking is editable in this specific master-detail view
+              customCanEdit={(record) => record.id === firstBookingId && canUpdate}
+            />
+            {totalCount > 0 && (
+              <div className={styles.calendarPaginationWrapper}>
+                <Pagination
+                  current={currentPage}
+                  pageSize={pagination.take}
+                  total={totalCount}
+                  showSizeChanger
+                  pageSizeOptions={[10, 25, 50, 100]}
+                  onChange={handlePageChange}
+                  showTotal={(total, range) =>
+                    `${range[0]}-${range[1]} of ${total} items`
+                  }
+                />
+              </div>
+            )}
+          </>
+        )}
+      </ErrorBoundary>
 
       <DetailModal
         open={
@@ -352,12 +471,12 @@ const SubscriptionDetailPage = () => {
           <>
             {modalState.data?.subscription && (
               <DetailSection
-                sections={createSubscriptionSections(modalState.data.subscription)}
+                sections={createSubscriptionSections(modalState.data.subscription, t)}
               />
             )}
             {modalState.data?.bookingExtraServices?.length > 0 && (
               <DetailSection
-                sections={createBookingExtraServicesSections(modalState.data.bookingExtraServices)}
+                sections={createBookingExtraServicesSections(modalState.data.bookingExtraServices, t)}
               />
             )}
           </>
@@ -367,4 +486,10 @@ const SubscriptionDetailPage = () => {
   );
 };
 
-export default SubscriptionDetailPage;
+const SubscriptionDetailPageWrapper = () => (
+  <PageGuard permission={PERMISSION_KEYS.SUBSCRIPTION_READ}>
+    <SubscriptionDetailPage />
+  </PageGuard>
+);
+
+export default SubscriptionDetailPageWrapper;

@@ -1,19 +1,24 @@
 /**
  * Sidebar Component
- * Navigation sidebar for the dashboard
- * Pixel-perfect implementation matching the KLYRA design
+ * Navigation sidebar with RBAC-based permission filtering
+ * and collapsible "Access Control" section
  */
 
 import { useServicesAdmin } from "@/hooks/useServices";
 import { useTranslation } from "@/hooks/useTranslation";
+import usePermission from "@/hooks/usePermission";
+import { SIDEBAR_PERMISSIONS } from "@/utils/sidebarPermissions";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   FiBarChart2,
   FiBox,
   FiCalendar,
+  FiChevronDown,
+  FiChevronRight,
   FiCreditCard,
   FiDollarSign,
   FiGift,
@@ -22,8 +27,10 @@ import {
   FiPercent,
   FiRepeat,
   FiSettings,
+  FiShield,
   FiTag,
-  FiUsers
+  FiUserCheck,
+  FiUsers,
 } from "react-icons/fi";
 import styles from "../../../../styles/sidebar.module.css";
 
@@ -73,11 +80,110 @@ SidebarItem.defaultProps = {
   onClick: null,
 };
 
+/**
+ * Collapsible sidebar section with sub-items.
+ */
+const SidebarGroup = memo(({
+  label,
+  icon: IconComponent,
+  items,
+  collapsed: sidebarCollapsed,
+  currentPath,
+  onClick,
+}) => {
+  const [expanded, setExpanded] = useState(true);
+
+  const isGroupActive = items.some((item) =>
+    item.key === "/"
+      ? currentPath === "/"
+      : currentPath.startsWith(item.key),
+  );
+
+  const handleToggle = useCallback(() => {
+    if (!sidebarCollapsed) {
+      setExpanded((prev) => !prev);
+    }
+  }, [sidebarCollapsed]);
+
+  return (
+    <div className={styles.menuGroup}>
+      <button
+        type="button"
+        className={`${styles.menuGroupHeader} ${isGroupActive ? styles.menuGroupHeaderActive : ""}`}
+        onClick={handleToggle}
+      >
+        <div className={styles.menuGroupLeft}>
+          <IconComponent className={styles.menuIcon} />
+          {!sidebarCollapsed && (
+            <span className={styles.menuLabel}>{label}</span>
+          )}
+        </div>
+        {!sidebarCollapsed && (
+          expanded
+            ? <FiChevronDown className={styles.menuGroupChevron} />
+            : <FiChevronRight className={styles.menuGroupChevron} />
+        )}
+      </button>
+      {expanded && !sidebarCollapsed && (
+        <div className={styles.menuGroupItems}>
+          {items.map((item) => (
+            <SidebarItem
+              key={item.key}
+              item={item}
+              isActive={
+                item.key === "/"
+                  ? currentPath === "/"
+                  : currentPath.startsWith(item.key)
+              }
+              collapsed={sidebarCollapsed}
+              onClick={onClick}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+SidebarGroup.displayName = "SidebarGroup";
+
+SidebarGroup.propTypes = {
+  label: PropTypes.string.isRequired,
+  icon: PropTypes.elementType.isRequired,
+  items: PropTypes.arrayOf(PropTypes.object).isRequired,
+  collapsed: PropTypes.bool,
+  currentPath: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
+};
+
+SidebarGroup.defaultProps = {
+  collapsed: false,
+  onClick: null,
+};
+
+/**
+ * Checks whether a sidebar item should be visible based on permissions.
+ */
+const isItemVisible = (item, can, canAny) => {
+  const requiredPermission = SIDEBAR_PERMISSIONS[item.key];
+
+  if (!requiredPermission) {
+    return true;
+  }
+
+  if (Array.isArray(requiredPermission)) {
+    return canAny(requiredPermission);
+  }
+
+  return can(requiredPermission);
+};
+
 const Sidebar = ({ collapsed, onCollapse, isMobile }) => {
   const router = useRouter();
   const currentPath = router.pathname;
   const { t } = useTranslation();
   const { data: servicesData } = useServicesAdmin();
+  const { can, canAny } = usePermission();
 
   const MENU_ITEMS = useMemo(
     () => [
@@ -148,13 +254,31 @@ const Sidebar = ({ collapsed, onCollapse, isMobile }) => {
         badge: null,
       },
       {
-        key: "/setttings",
+        key: "/settings",
         icon: FiSettings,
         label: t("navigation.settings"),
         badge: null,
       },
     ],
     [servicesData, t],
+  );
+
+  const ACCESS_CONTROL_ITEMS = useMemo(
+    () => [
+      {
+        key: "/roles",
+        icon: FiShield,
+        label: t("navigation.roles") || "Roles",
+        badge: null,
+      },
+      {
+        key: "/user-roles",
+        icon: FiUserCheck,
+        label: t("navigation.userRoles") || "User Roles",
+        badge: null,
+      },
+    ],
+    [t],
   );
 
   const handleMenuToggle = () => {
@@ -171,8 +295,18 @@ const Sidebar = ({ collapsed, onCollapse, isMobile }) => {
     }
   };
 
+  const filteredMenuItems = useMemo(
+    () => MENU_ITEMS.filter((item) => isItemVisible(item, can, canAny)),
+    [MENU_ITEMS, can, canAny],
+  );
+
+  const filteredAccessControlItems = useMemo(
+    () => ACCESS_CONTROL_ITEMS.filter((item) => isItemVisible(item, can, canAny)),
+    [ACCESS_CONTROL_ITEMS, can, canAny],
+  );
+
   const menuElements = useMemo(() => {
-    return MENU_ITEMS.map((item) => (
+    return filteredMenuItems.map((item) => (
       <SidebarItem
         key={item.key}
         item={item}
@@ -185,7 +319,9 @@ const Sidebar = ({ collapsed, onCollapse, isMobile }) => {
         onClick={handleItemClick}
       />
     ));
-  }, [MENU_ITEMS, currentPath, collapsed, handleItemClick]);
+  }, [filteredMenuItems, currentPath, collapsed, handleItemClick]);
+
+  const showAccessControl = filteredAccessControlItems.length > 0;
 
   return (
     <aside
@@ -209,7 +345,20 @@ const Sidebar = ({ collapsed, onCollapse, isMobile }) => {
         </button>
       </div>
 
-      <nav className={styles.nav}>{menuElements}</nav>
+      <nav className={styles.nav}>
+        {menuElements}
+
+        {showAccessControl && (
+          <SidebarGroup
+            label={t("navigation.accessControl") || "Access Control"}
+            icon={FiShield}
+            items={filteredAccessControlItems}
+            collapsed={collapsed}
+            currentPath={currentPath}
+            onClick={handleItemClick}
+          />
+        )}
+      </nav>
     </aside>
   );
 };

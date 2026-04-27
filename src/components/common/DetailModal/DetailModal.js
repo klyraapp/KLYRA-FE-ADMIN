@@ -62,7 +62,7 @@ const DetailModal = ({
   };
 
   const renderField = (field) => {
-    const { type, options, ...rest } = field;
+    const { type, options, revalidateFieldsOnChange, ...rest } = field;
 
     switch (type) {
       case "custom": {
@@ -86,7 +86,22 @@ const DetailModal = ({
           />
         );
       case "switch":
-        return <Switch disabled={isViewMode} {...rest} />;
+        return (
+          <Switch
+            disabled={isViewMode}
+            {...rest}
+            onChange={(checked, event) => {
+              if (typeof rest.onChange === "function") {
+                rest.onChange(checked, event);
+              }
+              if (Array.isArray(revalidateFieldsOnChange)) {
+                form.validateFields(revalidateFieldsOnChange).catch(() => {
+                  // keep inline field errors from validation
+                });
+              }
+            }}
+          />
+        );
       case "textarea":
         return (
           <Input.TextArea
@@ -157,6 +172,7 @@ const DetailModal = ({
                 name={field.name}
                 label={field.label}
                 rules={isViewMode ? [] : field.rules}
+                dependencies={field.dependencies}
                 valuePropName={field.type === "switch" ? "checked" : "value"}
                 className={field.fullWidth ? styles.fullWidth : styles.halfWidth}
               >
@@ -203,6 +219,8 @@ DetailModal.propTypes = {
       label: PropTypes.string.isRequired,
       type: PropTypes.string,
       rules: PropTypes.array,
+      dependencies: PropTypes.array,
+      revalidateFieldsOnChange: PropTypes.array,
       options: PropTypes.array,
       fullWidth: PropTypes.bool,
     }),

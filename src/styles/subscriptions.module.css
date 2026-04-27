@@ -133,8 +133,48 @@
   background: #f0fdf4 !important;
 }
 
+/* View toolbar: toggle + filters on the same row */
+.viewToolbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filtersWrapper {
+  flex: 1;
+}
+
+/* Remove margin from FiltersBar when inside toolbar */
+.filtersWrapper > div {
+  margin-bottom: 0 !important;
+}
+
+.calendarPaginationWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 12px 0;
+}
+
 @media (max-width: 768px) {
   .pageContainer {
-    padding: 16px;
+    padding: 16px 12px;
+  }
+
+  .viewToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filtersWrapper {
+    width: 100%;
+  }
+
+  /* Make ViewToggle full width if needed, but usually it's small icons */
+  .viewToolbar > :last-child {
+    align-self: flex-end;
   }
 }

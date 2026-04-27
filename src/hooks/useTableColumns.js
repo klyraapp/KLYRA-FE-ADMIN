@@ -5,7 +5,8 @@
 
 import RecurringIndicator from "@/components/common/RecurringIndicator";
 import { getSafeValue } from "@/utils/safeRendering";
-import { Tooltip } from "antd";
+import { Tooltip, Tag } from "antd";
+import { FileTextOutlined } from "@ant-design/icons";
 import { useMemo } from "react";
 import { useTranslation } from "./useTranslation";
 
@@ -13,7 +14,7 @@ const useTableColumns = () => {
   const { t } = useTranslation();
 
   const getCustomersColumns = useMemo(
-    () => (handleRowAction, styles, StatusBadge, ActionMenu) => [
+    () => (handleRowAction, styles, StatusBadge, ActionMenu, canUpdate = false, canDelete = false) => [
       {
         title: t("table.customerId"),
         dataIndex: "customerId",
@@ -57,7 +58,17 @@ const useTableColumns = () => {
         width: 80,
         align: "center",
         render: (_, record) => (
-          <ActionMenu onAction={handleRowAction} record={record} />
+          <ActionMenu
+            onAction={handleRowAction}
+            record={record}
+            items={[
+              { key: "view", label: t("common.view") },
+              ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+              ...(canDelete
+                ? [{ key: "delete", label: t("common.delete") }]
+                : []),
+            ]}
+          />
         ),
       },
     ],
@@ -119,6 +130,36 @@ const useTableColumns = () => {
             render: (service) => service?.name || "-",
           },
           {
+            title: t("table.extraServices") || "Extra Services",
+            dataIndex: "bookingExtraServices",
+            key: "extraServices",
+            width: 150,
+            render: (services) => {
+              if (!services || !services.length) return "-";
+              const names = services
+                .map((s) => s.extraService?.name)
+                .filter(Boolean);
+              if (!names.length) return "-";
+
+              return (
+                <Tooltip title={names.join(", ")}>
+                  <div className={styles.extraServicesCell}>
+                    {names.slice(0, 1).map((name, idx) => (
+                      <Tag key={idx} color="cyan" style={{ margin: 0 }}>
+                        {name}
+                      </Tag>
+                    ))}
+                    {names.length > 1 && (
+                      <Tag color="cyan" style={{ margin: 0 }}>
+                        +{names.length - 1}
+                      </Tag>
+                    )}
+                  </div>
+                </Tooltip>
+              );
+            },
+          },
+          {
             title: t("table.area"),
             dataIndex: "areaSqm",
             key: "area",
@@ -157,6 +198,27 @@ const useTableColumns = () => {
             ),
           },
           {
+            title: t("table.adminNotes") || "Admin Notes",
+            dataIndex: "adminNotes",
+            key: "adminNotes",
+            width: 100,
+            align: "center",
+            render: (notes) =>
+              notes ? (
+                <Tooltip title={notes}>
+                  <Tag
+                    color="red"
+                    icon={<FileTextOutlined />}
+                    style={{ cursor: "pointer", margin: 0 }}
+                  >
+                    Note
+                  </Tag>
+                </Tooltip>
+              ) : (
+                "-"
+              ),
+          },
+          {
             title: t("table.actions"),
             key: "actions",
             width: 80,
@@ -181,7 +243,15 @@ const useTableColumns = () => {
 
   const getServicesColumns = useMemo(
     () =>
-      (handleRowAction, styles, StatusBadge, ActionMenu, formatCurrency) => [
+      (
+        handleRowAction,
+        styles,
+        StatusBadge,
+        ActionMenu,
+        formatCurrency,
+        canUpdate = false,
+        canDelete = false,
+      ) => [
         {
           title: t("table.serviceId"),
           dataIndex: "id",
@@ -228,7 +298,17 @@ const useTableColumns = () => {
           width: 80,
           align: "center",
           render: (_, record) => (
-            <ActionMenu onAction={handleRowAction} record={record} />
+            <ActionMenu
+              onAction={handleRowAction}
+              record={record}
+              items={[
+                { key: "view", label: t("common.view") },
+                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                ...(canDelete
+                  ? [{ key: "delete", label: t("common.delete") }]
+                  : []),
+              ]}
+            />
           ),
         },
       ],
@@ -236,60 +316,87 @@ const useTableColumns = () => {
   );
 
   const getDiscountCodesColumns = useMemo(
-    () => (handleRowAction, styles, StatusBadge, ActionMenu, formatDate) => [
-      {
-        title: t("table.code"),
-        dataIndex: "code",
-        key: "code",
-        width: 150,
-      },
-      {
-        title: t("table.discount"),
-        dataIndex: "discountValue",
-        key: "discount",
-        width: 120,
-        render: (value, record) =>
-          record.discountType === "PERCENTAGE" ? `${value}%` : `${value} NOK`,
-      },
-      {
-        title: t("table.validFrom"),
-        dataIndex: "validFrom",
-        key: "validFrom",
-        width: 140,
-        render: (date) => formatDate(date),
-      },
-      {
-        title: t("table.validTo"),
-        dataIndex: "validUntil",
-        key: "validTo",
-        width: 140,
-        render: (date) => formatDate(date),
-      },
-      {
-        title: t("table.status"),
-        dataIndex: "isActive",
-        key: "status",
-        width: 100,
-        render: (isActive) => (
-          <StatusBadge status={isActive ? "active" : "inactive"} />
-        ),
-      },
-      {
-        title: t("table.actions"),
-        key: "actions",
-        width: 80,
-        align: "center",
-        render: (_, record) => (
-          <ActionMenu onAction={handleRowAction} record={record} />
-        ),
-      },
-    ],
+    () =>
+      (
+        handleRowAction,
+        styles,
+        StatusBadge,
+        ActionMenu,
+        formatDate,
+        canUpdate = false,
+        canDelete = false,
+      ) => [
+        {
+          title: t("table.code"),
+          dataIndex: "code",
+          key: "code",
+          width: 150,
+        },
+        {
+          title: t("table.discount"),
+          dataIndex: "discountValue",
+          key: "discount",
+          width: 120,
+          render: (value, record) =>
+            record.discountType === "PERCENTAGE" ? `${value}%` : `${value} NOK`,
+        },
+        {
+          title: t("table.validFrom"),
+          dataIndex: "validFrom",
+          key: "validFrom",
+          width: 140,
+          render: (date) => formatDate(date),
+        },
+        {
+          title: t("table.validTo"),
+          dataIndex: "validUntil",
+          key: "validTo",
+          width: 140,
+          render: (date) => formatDate(date),
+        },
+        {
+          title: t("table.status"),
+          dataIndex: "isActive",
+          key: "status",
+          width: 100,
+          render: (isActive) => (
+            <StatusBadge status={isActive ? "active" : "inactive"} />
+          ),
+        },
+        {
+          title: t("table.actions"),
+          key: "actions",
+          width: 80,
+          align: "center",
+          render: (_, record) => (
+            <ActionMenu
+              onAction={handleRowAction}
+              record={record}
+              items={[
+                { key: "view", label: t("common.view") },
+                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                ...(canDelete
+                  ? [{ key: "delete", label: t("common.delete") }]
+                  : []),
+              ]}
+            />
+          ),
+        },
+      ],
     [t],
   );
 
   const getAdditionalServicesColumns = useMemo(
     () =>
-      (handleRowAction, styles, StatusBadge, ActionMenu, formatCurrency) => [
+      (
+        handleRowAction,
+        styles,
+        StatusBadge,
+        ActionMenu,
+        formatCurrency,
+        canUpdate = false,
+        canDelete = false,
+      ) => [
         {
           title: t("table.serviceId"),
           dataIndex: "id",
@@ -331,7 +438,17 @@ const useTableColumns = () => {
           width: 80,
           align: "center",
           render: (_, record) => (
-            <ActionMenu onAction={handleRowAction} record={record} />
+            <ActionMenu
+              onAction={handleRowAction}
+              record={record}
+              items={[
+                { key: "view", label: t("common.view") },
+                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                ...(canDelete
+                  ? [{ key: "delete", label: t("common.delete") }]
+                  : []),
+              ]}
+            />
           ),
         },
       ],
@@ -346,7 +463,8 @@ const useTableColumns = () => {
         StatusBadge,
         ActionMenu,
         formatDate,
-        showDelete = true,
+        canUpdate = false,
+        canDelete = false,
       ) => [
           {
             title: t("table.offerId"),
@@ -406,32 +524,39 @@ const useTableColumns = () => {
               <StatusBadge status={isActive ? "active" : "inactive"} />
             ),
           },
-          {
-            title: t("table.actions"),
-            key: "actions",
-            width: 80,
-            align: "center",
-            render: (_, record) => (
-              <ActionMenu
-                onAction={handleRowAction}
-                record={record}
-                items={[
-                  { key: "view", label: t("common.view") },
-                  { key: "edit", label: t("common.edit") },
-                  ...(showDelete
-                    ? [{ key: "delete", label: t("common.delete") }]
-                    : []),
-                ]}
-              />
-            ),
-          },
+        {
+          title: t("table.actions"),
+          key: "actions",
+          width: 80,
+          align: "center",
+          render: (_, record) => (
+            <ActionMenu
+              onAction={handleRowAction}
+              record={record}
+              items={[
+                { key: "view", label: t("common.view") },
+                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                ...(canDelete
+                  ? [{ key: "delete", label: t("common.delete") }]
+                  : []),
+              ]}
+            />
+          ),
+        },
         ],
     [t],
   );
 
   const getPricingRulesColumns = useMemo(
     () =>
-      (handleRowAction, styles, ActionMenu, formatCurrency) => {
+      (
+        handleRowAction,
+        styles,
+        ActionMenu,
+        formatCurrency,
+        canUpdate = false,
+        canDelete = false,
+      ) => {
         const columns = [
           {
             title: "ID",
@@ -543,6 +668,15 @@ const useTableColumns = () => {
               <ActionMenu
                 onAction={handleRowAction}
                 record={record}
+                items={[
+                  { key: "view", label: t("common.view") },
+                  ...(canUpdate
+                    ? [{ key: "edit", label: t("common.edit") }]
+                    : []),
+                  ...(canDelete
+                    ? [{ key: "delete", label: t("common.delete") }]
+                    : []),
+                ]}
               />
             ),
           },
@@ -554,7 +688,15 @@ const useTableColumns = () => {
   );
   const getSubscriptionsColumns = useMemo(
     () =>
-      (handleRowAction, styles, StatusBadge, ActionMenu, formatDate, formatCurrency) => [
+      (
+        handleRowAction,
+        styles,
+        StatusBadge,
+        ActionMenu,
+        formatDate,
+        formatCurrency,
+        canUpdate = false,
+      ) => [
         {
           title: t("table.subscriptionId"),
           dataIndex: "id",
@@ -626,7 +768,8 @@ const useTableColumns = () => {
           key: "nextScheduledDate",
           width: 180,
           render: (date, record) => {
-            const formattedDate = typeof date === "string" ? date.split("T")[0] : "-";
+            const formattedDate =
+              typeof date === "string" ? date.split("T")[0] : "-";
             const expectedPrice = record?.futureBookingExpectedPrice;
 
             if (expectedPrice && record?.status !== "PENDING") {
@@ -651,7 +794,8 @@ const useTableColumns = () => {
           dataIndex: "nextInvoicingDate",
           key: "nextInvoicingDate",
           width: 180,
-          render: (date) => (typeof date === "string" ? date.split("T")[0] : "-"),
+          render: (date) =>
+            typeof date === "string" ? date.split("T")[0] : "-",
         },
         {
           title: t("table.date"),
@@ -672,7 +816,7 @@ const useTableColumns = () => {
                 record={record}
                 items={[
                   { key: "view", label: t("common.view") },
-                  ...(record.status !== "CANCELLED"
+                  ...(canUpdate && record.status !== "CANCELLED"
                     ? [{ key: "edit", label: t("common.edit") }]
                     : []),
                 ]}
@@ -697,6 +841,7 @@ const useTableColumns = () => {
         formatTime,
         formatBookingStatus,
         firstBookingId,
+        canUpdate = false,
       ) => [
           {
             title: t("table.bookingId"),
@@ -738,6 +883,36 @@ const useTableColumns = () => {
             render: (service) => service?.name || "-",
           },
           {
+            title: t("table.extraServices") || "Extra Services",
+            dataIndex: "bookingExtraServices",
+            key: "extraServices",
+            width: 150,
+            render: (services) => {
+              if (!services || !services.length) return "-";
+              const names = services
+                .map((s) => s.extraService?.name)
+                .filter(Boolean);
+              if (!names.length) return "-";
+
+              return (
+                <Tooltip title={names.join(", ")}>
+                  <div className={styles.extraServicesCell}>
+                    {names.slice(0, 1).map((name, idx) => (
+                      <Tag key={idx} color="cyan" style={{ margin: 0 }}>
+                        {name}
+                      </Tag>
+                    ))}
+                    {names.length > 1 && (
+                      <Tag color="cyan" style={{ margin: 0 }}>
+                        +{names.length - 1}
+                      </Tag>
+                    )}
+                  </div>
+                </Tooltip>
+              );
+            },
+          },
+          {
             title: t("table.area"),
             dataIndex: "areaSqm",
             key: "area",
@@ -776,6 +951,27 @@ const useTableColumns = () => {
             ),
           },
           {
+            title: t("table.adminNotes") || "Admin Notes",
+            dataIndex: "adminNotes",
+            key: "adminNotes",
+            width: 100,
+            align: "center",
+            render: (notes) =>
+              notes ? (
+                <Tooltip title={notes}>
+                  <Tag
+                    color="red"
+                    icon={<FileTextOutlined />}
+                    style={{ cursor: "pointer", margin: 0 }}
+                  >
+                    Note
+                  </Tag>
+                </Tooltip>
+              ) : (
+                "-"
+              ),
+          },
+          {
             title: t("table.actions"),
             key: "actions",
             width: 80,
@@ -790,7 +986,7 @@ const useTableColumns = () => {
                     record={record}
                     items={[
                       { key: "view", label: t("common.view") },
-                      ...(isFirst && isConfirmed
+                      ...(canUpdate && isFirst
                         ? [{ key: "edit", label: t("common.edit") }]
                         : []),
                     ]}
@@ -907,6 +1103,146 @@ const useTableColumns = () => {
     [t],
   );
 
+  const getRolesColumns = useMemo(
+    () => (handleRowAction, styles, ActionMenu, canUpdate = false, canDelete = false) => [
+      {
+        title: t("pages.roles.id") || "ID",
+        dataIndex: "id",
+        key: "id",
+        width: 80,
+      },
+      {
+        title: t("pages.roles.roleName") || "Role Name",
+        dataIndex: "name",
+        key: "name",
+        render: (text) => (
+          <span style={{ fontWeight: 500 }}>{text || "-"}</span>
+        ),
+      },
+      {
+        title: t("pages.roles.permissionsCount") || "Permissions",
+        key: "permissionsCount",
+        width: 120,
+        render: (_, record) => {
+          const count = record?.rolePermission?.length || 0;
+          return (
+            <span className={styles.permissionCount}>
+              {count}
+            </span>
+          );
+        },
+      },
+      {
+        title: t("pages.roles.createdAt") || "Created At",
+        dataIndex: "createdAt",
+        key: "createdAt",
+        width: 160,
+        render: (text) => {
+          if (!text) return "-";
+          return new Date(text).toLocaleDateString();
+        },
+      },
+      {
+        title: t("table.actions"),
+        key: "actions",
+        width: 80,
+        align: "center",
+        render: (_, record) => (
+          <ActionMenu
+            onAction={handleRowAction}
+            record={record}
+            items={[
+              { key: "view", label: t("common.view") },
+              ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+              ...(canDelete
+                ? [{ key: "delete", label: t("common.delete") }]
+                : []),
+            ]}
+          />
+        ),
+      },
+    ],
+    [t],
+  );
+
+  const getUserRolesColumns = useMemo(
+    () =>
+      (
+        handleRowAction,
+        styles,
+        ActionMenu,
+        Tag,
+        canUpdate = false,
+        canDelete = false,
+      ) => [
+      {
+        title: t("pages.userRoles.name") || "Name",
+        key: "name",
+        render: (_, record) => {
+          const name = `${record.firstName || ""} ${record.lastName || ""}`.trim();
+          return (
+            <span style={{ fontWeight: 500 }}>
+              {name || "-"}
+            </span>
+          );
+        },
+      },
+      {
+        title: t("pages.userRoles.email") || "Email",
+        dataIndex: "email",
+        key: "email",
+      },
+      {
+        title: t("pages.userRoles.roles") || "Role(s)",
+        key: "roles",
+        render: (_, record) => {
+          const userRoles = record.userRolePermission
+            ? record.userRolePermission
+                .filter((urp) => urp.role)
+                .map((urp) => urp.role)
+            : [];
+          if (userRoles.length === 0) {
+            return (
+              <Tag color="default">
+                {t("pages.userRoles.noRoles") || "No roles"}
+              </Tag>
+            );
+          }
+          return (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+              {userRoles.map((role) => (
+                <Tag key={role.id} color="green">
+                  {role.name}
+                </Tag>
+              ))}
+            </div>
+          );
+        },
+      },
+      {
+        title: t("table.actions"),
+        key: "actions",
+        width: 80,
+        align: "center",
+        render: (_, record) => (
+          <ActionMenu
+            onAction={handleRowAction}
+            record={record}
+            items={[
+              { key: "view", label: t("common.view") },
+              ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+              ...(canDelete
+                ? [{ key: "delete", label: t("common.delete") }]
+                : []),
+            ]}
+          />
+        ),
+      },
+    ],
+    [t],
+  );
+
+
   return {
     getCustomersColumns,
     getBookingsColumns,
@@ -918,6 +1254,8 @@ const useTableColumns = () => {
     getSubscriptionsColumns,
     getSubscriptionBookingsColumns,
     getPaymentsColumns,
+    getRolesColumns,
+    getUserRolesColumns,
   };
 };
 

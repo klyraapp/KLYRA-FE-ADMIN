@@ -11,9 +11,12 @@ import DetailModal from "@/components/common/DetailModal";
 import ExportSettingsModal from "@/components/export/ExportSettingsModal";
 import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageHeader from "@/components/PageHeader/PageHeader";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 import PrimaryButton from "@/components/PrimaryButton/PrimaryButton";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
 import { useDebounce } from "@/hooks/useDebounce";
+import usePermission from "@/hooks/usePermission";
 import useTableColumns from "@/hooks/useTableColumns";
 import { useTranslation } from "@/hooks/useTranslation";
 import {
@@ -23,6 +26,7 @@ import {
   useUsers,
 } from "@/hooks/useUsers";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import { getSafeValue, safeMap } from "@/utils/safeRendering";
 import { formatDate } from "@/utils/formatters";
 import { ExportOutlined } from "@ant-design/icons";
@@ -32,6 +36,7 @@ import styles from "@/styles/customers.module.css";
 
 const CustomersPage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const { getCustomersColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -294,8 +299,16 @@ const CustomersPage = () => {
   );
 
   const columns = useMemo(
-    () => getCustomersColumns(handleRowAction, styles, StatusBadge, ActionMenu),
-    [getCustomersColumns, handleRowAction],
+    () =>
+      getCustomersColumns(
+        handleRowAction,
+        styles,
+        StatusBadge,
+        ActionMenu,
+        can(PERMISSION_KEYS.USER_UPDATE),
+        can(PERMISSION_KEYS.USER_DELETE),
+      ),
+    [getCustomersColumns, handleRowAction, can],
   );
 
   const headerActions = (
@@ -308,108 +321,112 @@ const CustomersPage = () => {
       >
         <ExportOutlined className={styles.exportIcon} />
       </button>
-      <PrimaryButton textKey={t("buttons.addCustomer")} onClick={handleAddUser}>
-        {t("buttons.addCustomer")}
-      </PrimaryButton>
+      <PermissionGuard permission={PERMISSION_KEYS.USER_CREATE}>
+        <PrimaryButton textKey={t("buttons.addCustomer")} onClick={handleAddUser}>
+          {t("buttons.addCustomer")}
+        </PrimaryButton>
+      </PermissionGuard>
     </>
   );
 
   return (
-    <div className={styles.pageContainer}>
-      <PageHeader
-        titleKey={t("pages.customers.title")}
-        subtitleKey={t("pages.customers.subtitle")}
-        actions={headerActions}
-      />
-
-      <FiltersBar
-        searchPlaceholder={t("filters.searchPlaceholder")}
-        onSearch={handleSearch}
-        onStatusChange={handleStatusChange}
-        onDateChange={handleDateChange}
-        showStatusFilter
-        showDateFilter
-      >
-        <Select
-          placeholder={t("filters.sortBy")}
-          value={orderFilter}
-          onChange={handleOrderChange}
-          options={ORDER_OPTIONS}
-          className={styles.statusSelect}
-          style={{ width: 140 }}
+    <PageGuard permission={PERMISSION_KEYS.USER_READ}>
+      <div className={styles.pageContainer}>
+        <PageHeader
+          titleKey={t("pages.customers.title")}
+          subtitleKey={t("pages.customers.subtitle")}
+          actions={headerActions}
         />
-      </FiltersBar>
 
-      <ErrorBoundary>
-        <AntTable
-          columns={columns}
-          dataSource={transformedData}
-          rowKey="id"
-          showPagination
-          defaultPageSize={10}
-          loading={isLoading}
-          pagination={{
-            current: Math.floor(pagination.skip / pagination.take) + 1,
-            pageSize: pagination.take,
-            total: transformedData.length,
-          }}
-          onChange={(paginationConfig) => {
-            if (paginationConfig?.current && paginationConfig?.pageSize) {
-              handlePageChange(
-                paginationConfig.current,
-                paginationConfig.pageSize,
-              );
-            }
-          }}
+        <FiltersBar
+          searchPlaceholder={t("filters.searchPlaceholder")}
+          onSearch={handleSearch}
+          onStatusChange={handleStatusChange}
+          onDateChange={handleDateChange}
+          showStatusFilter
+          showDateFilter
+        >
+          <Select
+            placeholder={t("filters.sortBy")}
+            value={orderFilter}
+            onChange={handleOrderChange}
+            options={ORDER_OPTIONS}
+            className={styles.statusSelect}
+            style={{ width: 140 }}
+          />
+        </FiltersBar>
+
+        <ErrorBoundary>
+          <AntTable
+            columns={columns}
+            dataSource={transformedData}
+            rowKey="id"
+            showPagination
+            defaultPageSize={10}
+            loading={isLoading}
+            pagination={{
+              current: Math.floor(pagination.skip / pagination.take) + 1,
+              pageSize: pagination.take,
+              total: transformedData.length,
+            }}
+            onChange={(paginationConfig) => {
+              if (paginationConfig?.current && paginationConfig?.pageSize) {
+                handlePageChange(
+                  paginationConfig.current,
+                  paginationConfig.pageSize,
+                );
+              }
+            }}
+          />
+        </ErrorBoundary>
+
+        <DetailModal
+          open={
+            modalState.open &&
+            (modalState.type === "view" || modalState.type === "edit")
+          }
+          onClose={closeModal}
+          onSave={handleSave}
+          title={t("modals.customer")}
+          data={modalState.data}
+          fields={
+            modalState.type === "edit" ? CUSTOMER_EDIT_FIELDS : CUSTOMER_FIELDS
+          }
+          mode={modalState.type === "view" ? "view" : "edit"}
+          loading={isUpdating}
+          isCreateMode={false}
         />
-      </ErrorBoundary>
 
-      <DetailModal
-        open={
-          modalState.open &&
-          (modalState.type === "view" || modalState.type === "edit")
-        }
-        onClose={closeModal}
-        onSave={handleSave}
-        title={t("modals.customer")}
-        data={modalState.data}
-        fields={
-          modalState.type === "edit" ? CUSTOMER_EDIT_FIELDS : CUSTOMER_FIELDS
-        }
-        mode={modalState.type === "view" ? "view" : "edit"}
-        loading={isUpdating}
-        isCreateMode={false}
-      />
+        <DetailModal
+          open={modalState.open && modalState.type === "create"}
+          onClose={closeModal}
+          onSave={handleSave}
+          title={t("modals.customer")}
+          data={{}}
+          fields={CUSTOMER_CREATE_FIELDS}
+          mode="edit"
+          loading={isCreating}
+          isCreateMode={true}
+        />
 
-      <DetailModal
-        open={modalState.open && modalState.type === "create"}
-        onClose={closeModal}
-        onSave={handleSave}
-        title={t("modals.customer")}
-        data={{}}
-        fields={CUSTOMER_CREATE_FIELDS}
-        mode="edit"
-        loading={isCreating}
-        isCreateMode={true}
-      />
+        <DeleteConfirmModal
+          open={modalState.open && modalState.type === "delete"}
+          onConfirm={handleDelete}
+          onCancel={closeModal}
+          title={t("modals.deleteCustomer")}
+          itemName={`${modalState.data?.firstName || ""} ${modalState.data?.lastName || ""}`.trim()}
+          loading={isDeleting}
+        />
 
-      <DeleteConfirmModal
-        open={modalState.open && modalState.type === "delete"}
-        onConfirm={handleDelete}
-        onCancel={closeModal}
-        title={t("modals.deleteCustomer")}
-        itemName={`${modalState.data?.firstName || ""} ${modalState.data?.lastName || ""}`.trim()}
-        loading={isDeleting}
-      />
-
-      <ExportSettingsModal
-        open={exportModalOpen}
-        onClose={() => setExportModalOpen(false)}
-        pageKey="customers"
-        pageLabel={t("navigation.customers")}
-        getData={fetchCustomersForExport}
-      />
-    </div>
+        <ExportSettingsModal
+          open={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          pageKey="customers"
+          pageLabel={t("navigation.customers")}
+          getData={fetchCustomersForExport}
+        />
+      </div>
+    </PageGuard>
   );
 };
 

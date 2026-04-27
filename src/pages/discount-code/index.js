@@ -27,9 +27,14 @@ import { ExportOutlined } from "@ant-design/icons";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
 import { useCallback, useMemo, useState } from "react";
+import usePermission from "@/hooks/usePermission";
+import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import PageGuard from "@/components/common/RBAC/PageGuard";
+import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 
 const DiscountCodePage = () => {
   const { t } = useTranslation();
+  const { can } = usePermission();
   const { getDiscountCodesColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -42,17 +47,21 @@ const DiscountCodePage = () => {
     open: false,
   });
 
+  const canCreate = can(PERMISSION_KEYS.PROMO_CODE_CREATE);
+  const canUpdate = can(PERMISSION_KEYS.PROMO_CODE_UPDATE);
+  const canDelete = can(PERMISSION_KEYS.PROMO_CODE_DELETE);
+
   const PROMO_CODE_FIELDS = useMemo(
     () => [
       { name: "code", label: t("table.code"), rules: [{ required: true }] },
       {
         name: "discountType",
-        label: "Discount Type",
+        label: t("table.discountType"),
         type: "select",
         rules: [{ required: true }],
         options: [
-          { value: "PERCENTAGE", label: "Percentage" },
-          { value: "FIXED", label: "Fixed Amount" },
+          { value: "PERCENTAGE", label: t("table.percentage") },
+          { value: "FIXED", label: t("table.fixedAmount") },
         ],
       },
       {
@@ -63,11 +72,19 @@ const DiscountCodePage = () => {
       },
       { name: "validFrom", label: t("table.validFrom"), type: "date" },
       { name: "validUntil", label: t("table.validTo"), type: "date" },
-      { name: "maxUsageCount", label: "Max Usage Count", type: "number" },
-      { name: "maxUsagePerUser", label: "Max Usage Per User", type: "number" },
+      {
+        name: "maxUsageCount",
+        label: t("table.maxUsageCount"),
+        type: "number",
+      },
+      {
+        name: "maxUsagePerUser",
+        label: t("table.maxUsagePerUser"),
+        type: "number",
+      },
       { name: "isActive", label: t("common.active"), type: "switch" },
     ],
-    [t],
+    [t]
   );
 
   const queryParams = useMemo(() => {
@@ -188,8 +205,10 @@ const DiscountCodePage = () => {
         StatusBadge,
         ActionMenu,
         formatDate,
+        canUpdate,
+        canDelete,
       ),
-    [getDiscountCodesColumns, handleRowAction],
+    [getDiscountCodesColumns, handleRowAction, canUpdate, canDelete],
   );
 
   const handleExport = useCallback(() => {
@@ -210,13 +229,16 @@ const DiscountCodePage = () => {
       >
         <ExportOutlined className={styles.exportIcon} />
       </button>
-      <PrimaryButton textKey="buttons.createCode" onClick={handleCreateCode}>
-        {t("createCode")}
-      </PrimaryButton>
+      <PermissionGuard permission={PERMISSION_KEYS.PROMO_CODE_CREATE}>
+        <PrimaryButton textKey="buttons.createCode" onClick={handleCreateCode}>
+          {t("createCode")}
+        </PrimaryButton>
+      </PermissionGuard>
     </>
   );
 
   return (
+    <PageGuard permission={PERMISSION_KEYS.PROMO_CODE_READ}>
     <div className={styles.pageContainer}>
       <PageHeader
         titleKey="pages.discountCodes.title"
@@ -299,6 +321,7 @@ const DiscountCodePage = () => {
         getData={fetchPromoCodesForExport}
       />
     </div>
+    </PageGuard>
   );
 };
 
