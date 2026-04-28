@@ -9,6 +9,7 @@ import { useTheme } from "@/theme/ThemeProvider";
 import { deleteCookie } from "@/utils/utils";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, Switch } from "antd";
+import Logo from "@/components/common/Logo/Logo";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import { useCallback } from "react";
@@ -109,10 +110,10 @@ const Header = ({ onMenuClick, onMobileMenuClick }) => {
           >
             <Avatar
               className={styles.userAvatar}
-              src="https://randomuser.me/api/portraits/men/32.jpg"
+              icon={<Logo width={20} height={20} priority={false} />}
               alt={profileData?.profileName || "User profile"}
               size={32}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}
             />
           </Dropdown>
 

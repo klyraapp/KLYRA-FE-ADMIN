@@ -9,6 +9,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import usePermission from "@/hooks/usePermission";
 import { SIDEBAR_PERMISSIONS } from "@/utils/sidebarPermissions";
 import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import Image from "next/image";
+import Logo from "@/components/common/Logo/Logo";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
@@ -333,7 +335,10 @@ const Sidebar = ({ collapsed, onCollapse, isMobile }) => {
         <div
           className={`${styles.logo} ${collapsed ? styles.logoCollapsed : ""}`}
         >
-          <img src="/images/klayra_logo.svg" alt="KLYRA" className={styles.logoImage} />
+          <Logo
+            width={collapsed ? 32 : 120}
+            className={styles.logoImage}
+          />
         </div>
         <button
           type="button"
