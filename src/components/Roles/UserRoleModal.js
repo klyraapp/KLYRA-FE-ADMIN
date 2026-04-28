@@ -119,29 +119,76 @@ const UserRoleModal = ({
     );
   }, []);
 
-  const handleSave = useCallback((values) => {
-    const currentRoleId = values.roles;
+  const handleSave = useCallback(
+    (values) => {
+      if (!user) {
+        // Create User - Keep original flow and payload independent
+        const payload = {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          phone: values.phone,
+          password: values.password,
+          roles: values.roles ? [values.roles] : [],
+          permissions: selectedPermissionIds,
+          userSettings: { isTwoFactorAuth: false },
+        };
+        onSubmit(null, payload);
+        return;
+      }
 
-    const payload = {
-      firstName: values.firstName,
-      lastName: values.lastName,
-      email: values.email,
-      phone: values.phone,
-      roles: currentRoleId ? [currentRoleId] : [],
-      permissions: selectedPermissionIds,
-      userSettings: { isTwoFactorAuth: false },
-    };
+      // Update User - Implement the specific PUT payload structure
+      const currentRoleId = values.roles;
+      const previousRoles = user.userRolePermission
+        ? user.userRolePermission
+            .filter((urp) => urp.roleId)
+            .map((urp) => urp.roleId)
+        : [];
+      const currentRoles = currentRoleId ? [currentRoleId] : [];
 
-    if (values.password) {
-      payload.password = values.password;
-    }
+      // Calculate Direct Permissions (Overrides)
+      // Any permission in selectedPermissionIds that is not provided by the base role is a direct permission
+      const previousDirectPermissions = user.userRolePermission
+        ? user.userRolePermission
+            .filter((urp) => !urp.roleId && urp.permissionId)
+            .map((urp) => urp.permissionId)
+        : [];
 
-    if (!user) {
-      onSubmit(null, payload);
-    } else {
+      const currentDirectPermissions = selectedPermissionIds.filter(
+        (id) => !baseRolePermIds.includes(id),
+      );
+
+      const payload = {
+        email: values.email,
+        phone: values.phone || "",
+        firstName: values.firstName,
+        lastName: values.lastName,
+        fcmToken: user.fcmToken || "",
+        languagePreference: user.languagePreference || "en",
+        newRoles: currentRoles.filter((id) => !previousRoles.includes(id)),
+        deleteRoles: previousRoles.filter((id) => !currentRoles.includes(id)),
+        newPermissions: currentDirectPermissions.filter(
+          (id) => !previousDirectPermissions.includes(id),
+        ),
+        deletePermissions: previousDirectPermissions.filter(
+          (id) => !currentDirectPermissions.includes(id),
+        ),
+        userSettings: {
+          isTwoFactorAuth:
+            user.userSettings?.isTwoFactorAuth ||
+            user.isTwoFactorAuth ||
+            false,
+        },
+      };
+
+      if (values.password) {
+        payload.password = values.password;
+      }
+
       onSubmit(user.id, payload);
-    }
-  }, [selectedPermissionIds, user, onSubmit]);
+    },
+    [selectedPermissionIds, user, onSubmit, baseRolePermIds],
+  );
 
   const userName = user
     ? `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || user?.email
@@ -217,12 +264,13 @@ const UserRoleModal = ({
       onSave={handleSave}
       title={
         user
-          ? `${t("pages.userRoles.editRoles") || "Edit Roles"} — ${userName}`
-          : t("pages.userRoles.addUser") || "Add New User"
+          ? `${t("modals.user") || "User"} — ${userName}`
+          : t("modals.user") || "User"
       }
       data={initialData}
       fields={fields}
-      mode={user ? "edit" : "create"}
+      mode={user ? "edit" : "edit"}
+      isCreateMode={!user}
       loading={isSubmitting}
     >
       <div style={{ padding: "0 24px" }}>
