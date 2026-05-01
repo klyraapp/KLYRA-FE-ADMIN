@@ -5,7 +5,8 @@
 import { useLanguage } from "@/context/LanguageContext";
 import AppSettingsSection from "@/features/app-settings/components/AppSettingsSection";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useTheme } from "@/theme/ThemeProvider";
+// `useTheme` import kept commented along with the dark-mode row below.
+// import { useTheme } from "@/theme/ThemeProvider";
 import { Select, Switch } from "antd";
 import { useCallback, useMemo, useState } from "react";
 import SettingsCard from "../../components/Settings/SettingsCard";
@@ -16,7 +17,8 @@ import styles from "../../styles/settingsPage.module.css";
 
 const SettingsPage = () => {
   const { t } = useTranslation();
-  const { isDarkMode, toggleTheme } = useTheme();
+  // Dark-mode toggle is currently disabled in the UI; see commented row below.
+  // const { isDarkMode, toggleTheme } = useTheme();
   const { currentLanguage, changeLanguage } = useLanguage();
   const [notificationEnabled, setNotificationEnabled] = useState(true);
 
@@ -54,9 +56,11 @@ const SettingsPage = () => {
               onChange={handleNotificationChange}
             />
           </SettingsRow>
+          {/* Dark-mode toggle temporarily disabled.
           <SettingsRow label={t("settings.darkMode")}>
             <Switch checked={isDarkMode} onChange={toggleTheme} />
           </SettingsRow>
+          */}
           <SettingsRow label={t("settings.language")}>
             <Select
               value={currentLanguage}

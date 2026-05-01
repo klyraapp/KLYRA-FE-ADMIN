@@ -31,15 +31,18 @@ const Dashboard = () => {
   // Redirect to the first available route if user doesn't have dashboard access
   useEffect(() => {
     const hasDashboardAccess = can(PERMISSION_KEYS.DASHBOARD_READ);
-    
+
     if (!hasDashboardAccess) {
       // Find the first route from sidebar config (excluding root itself) that the user can access
-      const routes = Object.keys(SIDEBAR_PERMISSIONS).filter(route => route !== "/");
-      
-      const firstAvailableRoute = routes.find(route => {
+      const routes = Object.keys(SIDEBAR_PERMISSIONS).filter(
+        (route) => route !== "/",
+      );
+
+      const firstAvailableRoute = routes.find((route) => {
         const requiredPermission = SIDEBAR_PERMISSIONS[route];
-        if (!requiredPermission) return true;
-        
+
+        if (!requiredPermission) return false;
+
         if (Array.isArray(requiredPermission)) {
           return canAny(requiredPermission);
         }

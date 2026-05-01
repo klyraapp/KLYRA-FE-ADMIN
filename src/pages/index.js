@@ -28,7 +28,8 @@ const IndexPage = () => {
 
       const firstAvailableRoute = routes.find((route) => {
         const requiredPermission = SIDEBAR_PERMISSIONS[route];
-        if (!requiredPermission) return true;
+
+        if (!requiredPermission) return false;
 
         if (Array.isArray(requiredPermission)) {
           return canAny(requiredPermission);

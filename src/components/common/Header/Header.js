@@ -5,10 +5,12 @@
  */
 
 import { logout } from "@/redux/reducers/authSlice";
-import { useTheme } from "@/theme/ThemeProvider";
+// `useTheme` import kept commented along with the dark-mode toggle below.
+// import { useTheme } from "@/theme/ThemeProvider";
 import { deleteCookie } from "@/utils/utils";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Dropdown, Switch } from "antd";
+// `Switch` is intentionally not imported — dark-mode toggle is commented out below.
+import { Avatar, Dropdown } from "antd";
 import Logo from "@/components/common/Logo/Logo";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
@@ -18,7 +20,8 @@ import { useDispatch, useSelector } from "react-redux";
 import styles from "../../../../styles/Header.module.css";
 
 const Header = ({ onMenuClick, onMobileMenuClick }) => {
-  const { isDarkMode, toggleTheme } = useTheme();
+  // Dark-mode toggle is currently disabled in the UI; see commented Switch below.
+  // const { isDarkMode, toggleTheme } = useTheme();
   const dispatch = useDispatch();
   const router = useRouter();
   const { profileData } = useSelector((state) => state.users);
@@ -87,12 +90,14 @@ const Header = ({ onMenuClick, onMobileMenuClick }) => {
         </div> */}
 
         <div className={styles.actionsWrapper}>
+          {/* Dark-mode toggle temporarily disabled.
           <Switch
             className={styles.themeToggle}
             checked={isDarkMode}
             onChange={toggleTheme}
             size="small"
           />
+          */}
 
           <button
             type="button"
