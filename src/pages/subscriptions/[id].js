@@ -17,7 +17,7 @@ import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import PageGuard from "@/components/common/RBAC/PageGuard";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
-import { useBookings, useDisabledDates, useUpdateBooking } from "@/hooks/useBookings";
+import { useBookings, useCalendarBookings, useDisabledDates, useUpdateBooking } from "@/hooks/useBookings";
 import usePermission from "@/hooks/usePermission";
 import useTableColumns from "@/hooks/useTableColumns";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -155,7 +155,7 @@ const SubscriptionDetailPage = () => {
     { value: BookingStatus.CANCELLED, label: t("status.cancelled") },
   ], [t]);
 
-  const queryParams = useMemo(() => {
+  const listQueryParams = useMemo(() => {
     const params = {
       take: pagination.take,
       skip: pagination.skip,
@@ -170,23 +170,52 @@ const SubscriptionDetailPage = () => {
       params.status = statusFilter.toUpperCase();
     }
 
-    if (monthFilter) {
+    if (monthFilter && activeView === VIEW_LIST) {
       params.month = monthFilter.month() + 1;
       params.year = monthFilter.year();
     }
 
     return params;
-  }, [searchTerm, statusFilter, monthFilter, pagination, subscriptionId]);
+  }, [searchTerm, statusFilter, monthFilter, pagination, subscriptionId, activeView]);
 
-  const { data: bookingsResponse, isLoading } = useBookings(queryParams, {
-    enabled: Boolean(subscriptionId),
+  const calendarQueryParams = useMemo(() => {
+    const params = {
+      subscriptionId,
+      month: monthFilter ? monthFilter.month() + 1 : dayjs().month() + 1,
+      year: monthFilter ? monthFilter.year() : dayjs().year(),
+    };
+
+    if (searchTerm) {
+      params.search = searchTerm;
+    }
+
+    if (statusFilter && statusFilter !== "all") {
+      params.status = statusFilter.toUpperCase();
+    }
+
+    return params;
+  }, [monthFilter, searchTerm, statusFilter, subscriptionId]);
+
+  const { data: listBookingsResponse, isLoading: isListLoading } = useBookings(listQueryParams, {
+    enabled: Boolean(subscriptionId) && activeView === VIEW_LIST,
   });
 
-  const bookings = useMemo(() => {
-    return bookingsResponse?.bookings || [];
-  }, [bookingsResponse]);
+  const { data: calendarBookingsResponse, isLoading: isCalendarLoading } = useCalendarBookings(calendarQueryParams, {
+    enabled: Boolean(subscriptionId) && activeView === VIEW_CALENDAR,
+  });
 
-  const totalCount = bookingsResponse?.totalCount || 0;
+  const isLoading = activeView === VIEW_LIST ? isListLoading : isCalendarLoading;
+
+  const bookings = useMemo(() => {
+    if (activeView === VIEW_LIST) {
+      return listBookingsResponse?.bookings || [];
+    }
+    return calendarBookingsResponse?.bookings || [];
+  }, [activeView, listBookingsResponse, calendarBookingsResponse]);
+
+  const totalCount = activeView === VIEW_LIST 
+    ? (listBookingsResponse?.totalCount || 0)
+    : (calendarBookingsResponse?.totalCount || 0);
   const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking();
 
   const firstBookingId = useMemo(() => {
@@ -386,7 +415,11 @@ const SubscriptionDetailPage = () => {
             onStatusChange={handleStatusChange}
             onDateChange={handleDateChange}
             showStatusFilter
+            showSearch
             showDateFilter
+            dateValue={activeView === VIEW_CALENDAR ? (monthFilter || dayjs()) : monthFilter}
+            statusValue={statusFilter}
+            searchValue={searchTerm}
             statusOptions={BOOKING_STATUS_OPTIONS}
           />
         </div>
@@ -425,32 +458,15 @@ const SubscriptionDetailPage = () => {
         )}
 
         {activeView === VIEW_CALENDAR && (
-          <>
-            <BookingsCalendar
-              bookings={bookings}
-              loading={isLoading}
-              onAction={handleRowAction}
-              canEdit={canUpdate}
-              totalCount={totalCount}
-              // Only first booking is editable in this specific master-detail view
-              customCanEdit={(record) => record.id === firstBookingId && canUpdate}
-            />
-            {totalCount > 0 && (
-              <div className={styles.calendarPaginationWrapper}>
-                <Pagination
-                  current={currentPage}
-                  pageSize={pagination.take}
-                  total={totalCount}
-                  showSizeChanger
-                  pageSizeOptions={[10, 25, 50, 100]}
-                  onChange={handlePageChange}
-                  showTotal={(total, range) =>
-                    `${range[0]}-${range[1]} of ${total} items`
-                  }
-                />
-              </div>
-            )}
-          </>
+          <BookingsCalendar
+            bookings={bookings}
+            loading={isLoading}
+            onAction={handleRowAction}
+            canEdit={canUpdate}
+            totalCount={totalCount}
+            // Only first booking is editable in this specific master-detail view
+            customCanEdit={(record) => record.id === firstBookingId && canUpdate}
+          />
         )}
       </ErrorBoundary>
 

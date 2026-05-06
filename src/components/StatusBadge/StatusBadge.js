@@ -54,6 +54,10 @@ const STATUS_CONFIG = {
     className: styles.inactive,
     translationKey: "status.expired",
   },
+  reserved: {
+    className: styles.reserved,
+    translationKey: "status.reserved",
+  },
 };
 
 const StatusBadge = ({ status }) => {
@@ -77,6 +81,7 @@ StatusBadge.propTypes = {
     "unpaid",
     "failed",
     "expired",
+    "reserved",
   ]),
 };
 

@@ -37,6 +37,7 @@ export const formatArea = (sqm) => {
 };
 
 export const formatBookingStatus = (status) => {
+  if (status === null || status === undefined) return "reserved";
   const statusMap = {
     PENDING: "pending",
     CONFIRMED: "confirmed",

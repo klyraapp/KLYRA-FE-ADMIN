@@ -8,6 +8,7 @@ import {
   deleteBooking,
   getBookingById,
   getBookings,
+  getCalendarBookings,
   getDisabledDates,
   updateBooking,
   updateBookingStatus,
@@ -16,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useToast from "./useToast";
 
 const BOOKINGS_QUERY_KEY = "bookings";
+const CALENDAR_BOOKINGS_QUERY_KEY = "calendarBookings";
 
 export const useBookings = (params = {}, options = {}) => {
   return useQuery({
@@ -131,6 +133,48 @@ export const useDeleteBooking = () => {
     onError: () => {
       toast.error("messages.bookingDeleteFailed");
     },
+  });
+};
+
+export const useCalendarBookings = (params = {}, options = {}) => {
+  return useQuery({
+    queryKey: [CALENDAR_BOOKINGS_QUERY_KEY, params],
+    queryFn: async () => {
+      const response = await getCalendarBookings(params);
+      const rawData = response?.data;
+      if (!rawData) return { bookings: [], totalCount: 0 };
+
+      let bookings = [];
+      let totalCount = 0;
+
+      if (Array.isArray(rawData)) {
+        // Handle [bookings, count] or [booking1, booking2]
+        if (Array.isArray(rawData[0])) {
+          bookings = rawData[0];
+          totalCount = rawData[1] || bookings.length;
+        } else {
+          bookings = rawData;
+          totalCount = rawData.length;
+        }
+      } else if (rawData.bookings && Array.isArray(rawData.bookings)) {
+        // Handle { bookings: [], totalCount: n }
+        bookings = rawData.bookings;
+        totalCount = rawData.totalCount || rawData.bookings.length;
+      } else if (rawData.data && Array.isArray(rawData.data)) {
+        // Handle { data: [], totalCount: n }
+        bookings = rawData.data;
+        totalCount = rawData.totalCount || rawData.count || rawData.data.length;
+      }
+
+      return {
+        bookings,
+        totalCount,
+      };
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    ...options,
   });
 };
 

@@ -150,13 +150,7 @@
   margin-bottom: 0 !important;
 }
 
-.calendarPaginationWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
-  padding: 12px 0;
-}
+
 
 @media (max-width: 768px) {
   .pageContainer {

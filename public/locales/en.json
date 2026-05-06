@@ -39,7 +39,8 @@
     "expired": "Waiting payment",
     "paid": "Paid",
     "failed": "Failed",
-    "unpaid": "Unpaid"
+    "unpaid": "Unpaid",
+    "reserved": "Reserved"
   },
   "actions": {
     "view_details": "View Details",

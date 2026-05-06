@@ -45,8 +45,16 @@ const BookingsCalendar = ({
     <div className={styles.calendarContainer}>
       <div className={styles.summaryBar}>
         <span className={styles.summaryText}>
-          Showing <strong>{bookings.length}</strong> of{" "}
-          <strong>{totalCount}</strong> bookings
+          {totalCount > 0 ? (
+            <>
+              Showing <strong>{bookings.length}</strong> of{" "}
+              <strong>{totalCount}</strong> bookings
+            </>
+          ) : (
+            <>
+              Showing <strong>{bookings.length}</strong> bookings
+            </>
+          )}
         </span>
       </div>
       <div className={styles.daysList}>

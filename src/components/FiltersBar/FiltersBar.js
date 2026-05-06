@@ -19,6 +19,9 @@ const FiltersBar = ({
   showStatusFilter,
   showSearch = true,
   statusOptions,
+  dateValue,
+  statusValue,
+  searchValue,
   children,
 }) => {
   const { t } = useTranslation();
@@ -69,6 +72,7 @@ const FiltersBar = ({
             placeholder={searchPlaceholder || t("filters.searchPlaceholder")}
             prefix={<SearchOutlined className={styles.searchIcon} />}
             onChange={handleSearch}
+            value={searchValue}
             className={styles.searchInput}
           />
         </div>
@@ -76,7 +80,7 @@ const FiltersBar = ({
       <div className={styles.filtersRight}>
         {showStatusFilter && (
           <Select
-            defaultValue="all"
+            value={statusValue || "all"}
             options={activeStatusOptions}
             onChange={handleStatusChange}
             className={styles.statusSelect}
@@ -88,6 +92,7 @@ const FiltersBar = ({
             picker="month"
             placeholder={t("filters.selectMonth")}
             onChange={handleDateChange}
+            value={dateValue}
             suffixIcon={<CalendarOutlined />}
             className={styles.datePicker}
           />
@@ -113,6 +118,9 @@ FiltersBar.propTypes = {
     }),
   ),
   children: PropTypes.node,
+  dateValue: PropTypes.object,
+  statusValue: PropTypes.string,
+  searchValue: PropTypes.string,
 };
 
 FiltersBar.defaultProps = {
@@ -125,6 +133,9 @@ FiltersBar.defaultProps = {
   showSearch: true,
   statusOptions: null,
   children: null,
+  dateValue: null,
+  statusValue: "",
+  searchValue: "",
 };
 
 export default memo(FiltersBar);

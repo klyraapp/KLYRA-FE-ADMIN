@@ -39,7 +39,8 @@
     "expired": "Venter betaling",
     "paid": "Betalt",
     "failed": "Mislyktes",
-    "unpaid": "Ubetalt"
+    "unpaid": "Ubetalt",
+    "reserved": "Reservert"
   },
   "actions": {
     "view_details": "Vis detaljer",

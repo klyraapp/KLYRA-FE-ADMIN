@@ -39,9 +39,9 @@ const CalendarDayGroup = ({
 
       {hasBookings && (
         <div className={styles.bookingsList}>
-          {bookings.map((booking) => (
+          {bookings.map((booking, index) => (
             <BookingCard
-              key={booking?.id}
+              key={booking?.id || `reserved-${index}`}
               booking={booking}
               onAction={onAction}
               canEdit={canEdit}
