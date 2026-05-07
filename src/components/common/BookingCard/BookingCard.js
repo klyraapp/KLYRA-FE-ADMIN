@@ -143,7 +143,7 @@ const BookingCard = ({
 
         <div className={styles.cardFooter}>
           <StatusBadge status={formattedStatus} />
-          {(booking?.adminNotes || booking?.specialInstructions) && (
+          {booking?.adminNotes && (
             <Tag
               color="red"
               icon={<FileTextOutlined />}
