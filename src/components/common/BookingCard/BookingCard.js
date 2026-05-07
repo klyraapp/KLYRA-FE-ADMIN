@@ -9,7 +9,7 @@ import RecurringIndicator from "@/components/common/RecurringIndicator";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
 import { FileTextOutlined } from "@ant-design/icons";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Tag } from "antd";
+import { Tag, Tooltip } from "antd";
 import {
   formatArea,
   formatBookingStatus,
@@ -144,14 +144,16 @@ const BookingCard = ({
         <div className={styles.cardFooter}>
           <StatusBadge status={formattedStatus} />
           {booking?.adminNotes && (
-            <Tag
-              color="red"
-              icon={<FileTextOutlined />}
-              className={styles.noteTag}
-              title={booking?.adminNotes || booking?.specialInstructions}
-            >
-              {t("table.adminNotes") || "Admin Notes"}
-            </Tag>
+            <Tooltip title={booking?.adminNotes}>
+              <Tag
+                color="red"
+                icon={<FileTextOutlined />}
+                className={styles.noteTag}
+                style={{ cursor: "pointer" }}
+              >
+                {t("table.adminNotes") || "Admin Notes"}
+              </Tag>
+            </Tooltip>
           )}
         </div>
       </div>
