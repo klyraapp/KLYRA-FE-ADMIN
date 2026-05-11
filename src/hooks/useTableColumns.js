@@ -181,13 +181,13 @@ const useTableColumns = () => {
             width: 120,
             render: (date) => formatDate(date),
           },
-          {
-            title: t("table.time"),
-            dataIndex: "startTime",
-            key: "time",
-            width: 100,
-            render: (time) => formatTime(time),
-          },
+          // {
+          //   title: t("table.time"),
+          //   dataIndex: "startTime",
+          //   key: "time",
+          //   width: 100,
+          //   render: (time) => formatTime(time),
+          // },
           {
             title: t("table.status"),
             dataIndex: "status",
@@ -934,13 +934,13 @@ const useTableColumns = () => {
             width: 120,
             render: (date) => formatDate(date),
           },
-          {
-            title: t("table.time"),
-            dataIndex: "startTime",
-            key: "time",
-            width: 100,
-            render: (time) => formatTime(time),
-          },
+          // {
+          //   title: t("table.time"),
+          //   dataIndex: "startTime",
+          //   key: "time",
+          //   width: 100,
+          //   render: (time) => formatTime(time),
+          // },
           {
             title: t("table.status"),
             dataIndex: "status",

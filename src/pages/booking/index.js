@@ -80,7 +80,7 @@ const BookingsPage = () => {
       { name: "areaSqm", label: t("pages.bookings.fields.areaSqm") },
       { name: "areaSqft", label: t("pages.bookings.fields.areaSqft") },
       { name: "bookingDate", label: t("pages.bookings.fields.bookingDate") },
-      { name: "startTime", label: t("pages.bookings.fields.startTime") },
+      // { name: "startTime", label: t("pages.bookings.fields.startTime") },
       {
         name: "serviceStreetAddress",
         label: t("pages.bookings.fields.streetAddress"),

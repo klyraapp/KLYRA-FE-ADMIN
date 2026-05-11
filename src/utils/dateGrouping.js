@@ -42,10 +42,10 @@ export const groupBookingsByDate = (bookings = [], dateField = "bookingDate") =>
   if (!minDate || !maxDate) return [];
 
   const results = [];
-  let current = dayjs(maxDate);
-  const end = dayjs(minDate);
+  let current = dayjs(minDate);
+  const end = dayjs(maxDate);
 
-  while (current.isAfter(end) || current.isSame(end, "day")) {
+  while (current.isBefore(end) || current.isSame(end, "day")) {
     const dateKey = current.format("YYYY-MM-DD");
     const bookingsForDay = grouped[dateKey] || [];
 
@@ -64,7 +64,7 @@ export const groupBookingsByDate = (bookings = [], dateField = "bookingDate") =>
       bookings: dayBookings,
     });
 
-    current = current.subtract(1, "day");
+    current = current.add(1, "day");
   }
 
   return results;

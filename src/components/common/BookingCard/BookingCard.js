@@ -100,14 +100,14 @@ const BookingCard = ({
             {serviceName}
           </span>
           <span className={styles.metaDivider}>·</span>
-          {booking?.startTime && (
+          {/* {booking?.startTime && (
             <>
               <span className={styles.metaItem}>
                 {formatTime(booking?.startTime)}
               </span>
               <span className={styles.metaDivider}>·</span>
             </>
-          )}
+          )} */}
           <span className={styles.metaItem}>
             {formatArea(booking?.areaSqm)}
           </span>
