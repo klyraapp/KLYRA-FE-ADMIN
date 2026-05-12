@@ -39,6 +39,7 @@ import usePermission from "@/hooks/usePermission";
 import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import PageGuard from "@/components/common/RBAC/PageGuard";
 import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
+import { useDebounce } from "@/hooks/useDebounce";
 import styles from "@/styles/services-pricing.module.css";
 import { useState ,useMemo, useCallback} from "react";
 const ServicesPricingPage = () => {
@@ -46,6 +47,7 @@ const ServicesPricingPage = () => {
   const { can } = usePermission();
   const { getServicesColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
   const [pagination, setPagination] = useState({
@@ -252,8 +254,8 @@ const ServicesPricingPage = () => {
       skip: pagination.skip,
     };
 
-    if (searchTerm) {
-      params.search = searchTerm;
+    if (debouncedSearchTerm) {
+      params.search = debouncedSearchTerm;
     }
 
     if (statusFilter && statusFilter !== "all") {
@@ -265,7 +267,7 @@ const ServicesPricingPage = () => {
     }
 
     return params;
-  }, [searchTerm, statusFilter, monthFilter, pagination]);
+  }, [debouncedSearchTerm, statusFilter, monthFilter, pagination]);
 
   const { data: servicesResponse = {}, isLoading } =
     useServicesAdmin(queryParams);

@@ -17,6 +17,7 @@ import useTableColumns from "@/hooks/useTableColumns";
 import { useTranslation } from "@/hooks/useTranslation";
 import styles from "@/styles/special-offers.module.css";
 import { formatDate } from "@/utils/formatters";
+import { useDebounce } from "@/hooks/useDebounce";
 import { ExportOutlined } from "@ant-design/icons";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
@@ -31,6 +32,7 @@ const SpecialOffersPage = () => {
   const { can } = usePermission();
   const { getSpecialOffersColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
@@ -88,8 +90,8 @@ const SpecialOffersPage = () => {
       skip: pagination.skip,
     };
 
-    if (searchTerm) {
-      params.name = searchTerm;
+    if (debouncedSearchTerm) {
+      params.name = debouncedSearchTerm;
     }
 
     if (statusFilter && statusFilter !== "all") {
@@ -101,7 +103,7 @@ const SpecialOffersPage = () => {
     }
 
     return params;
-  }, [searchTerm, statusFilter, monthFilter, pagination]);
+  }, [debouncedSearchTerm, statusFilter, monthFilter, pagination]);
 
   const { data: offersResponse, isLoading } = useOffers(queryParams);
 

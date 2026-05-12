@@ -25,6 +25,7 @@ import ExportSettingsModal from "@/components/export/ExportSettingsModal";
 import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   useBookings,
   useCalendarBookings,
@@ -147,6 +148,7 @@ const BookingsPage = () => {
 
   const [activeView, setActiveView] = useState(VIEW_LIST);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
@@ -178,8 +180,8 @@ const BookingsPage = () => {
       skip: pagination.skip,
     };
 
-    if (searchTerm) {
-      params.search = searchTerm;
+    if (debouncedSearchTerm) {
+      params.search = debouncedSearchTerm;
     }
 
     if (statusFilter && statusFilter !== "all") {
@@ -192,7 +194,7 @@ const BookingsPage = () => {
     }
 
     return params;
-  }, [searchTerm, statusFilter, monthFilter, pagination, activeView]);
+  }, [debouncedSearchTerm, statusFilter, monthFilter, pagination, activeView]);
 
   const calendarQueryParams = useMemo(() => {
     const params = {
@@ -200,8 +202,8 @@ const BookingsPage = () => {
       year: monthFilter ? monthFilter.year() : dayjs().year(),
     };
 
-    if (searchTerm) {
-      params.search = searchTerm;
+    if (debouncedSearchTerm) {
+      params.search = debouncedSearchTerm;
     }
 
     if (statusFilter && statusFilter !== "all") {
@@ -209,7 +211,7 @@ const BookingsPage = () => {
     }
 
     return params;
-  }, [monthFilter, searchTerm, statusFilter]);
+  }, [monthFilter, debouncedSearchTerm, statusFilter]);
 
   const { data: listBookingsResponse, isLoading: isListLoading } = useBookings(listQueryParams, {
     enabled: activeView === VIEW_LIST,

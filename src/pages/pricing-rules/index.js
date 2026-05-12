@@ -32,6 +32,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { ExportOutlined } from "@ant-design/icons";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import usePermission from "@/hooks/usePermission";
@@ -46,6 +47,7 @@ const PricingRulesPage = () => {
   const { can } = usePermission();
   const { getPricingRulesColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
   const [pagination, setPagination] = useState({
@@ -69,8 +71,8 @@ const PricingRulesPage = () => {
       skip: pagination.skip,
     };
 
-    if (searchTerm) {
-      params.search = searchTerm;
+    if (debouncedSearchTerm) {
+      params.search = debouncedSearchTerm;
     }
 
     if (monthFilter) {
@@ -78,7 +80,7 @@ const PricingRulesPage = () => {
     }
 
     return params;
-  }, [searchTerm, monthFilter, pagination]);
+  }, [debouncedSearchTerm, monthFilter, pagination]);
 
   const pricingRuleViewFields = useMemo(() => [
     { name: "id", label: t("table.id") || "ID" },

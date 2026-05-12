@@ -17,6 +17,7 @@ import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageHeader from "@/components/PageHeader/PageHeader";
 import PageGuard from "@/components/common/RBAC/PageGuard";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useBookings, useCalendarBookings, useDisabledDates, useUpdateBooking } from "@/hooks/useBookings";
 import usePermission from "@/hooks/usePermission";
 import useTableColumns from "@/hooks/useTableColumns";
@@ -137,6 +138,7 @@ const SubscriptionDetailPage = () => {
   const canUpdate = can(PERMISSION_KEYS.BOOKING_UPDATE);
   const [activeView, setActiveView] = useState(VIEW_LIST);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
@@ -162,8 +164,8 @@ const SubscriptionDetailPage = () => {
       subscriptionId,
     };
 
-    if (searchTerm) {
-      params.search = searchTerm;
+    if (debouncedSearchTerm) {
+      params.search = debouncedSearchTerm;
     }
 
     if (statusFilter && statusFilter !== "all") {
@@ -176,7 +178,7 @@ const SubscriptionDetailPage = () => {
     }
 
     return params;
-  }, [searchTerm, statusFilter, monthFilter, pagination, subscriptionId, activeView]);
+  }, [debouncedSearchTerm, statusFilter, monthFilter, pagination, subscriptionId, activeView]);
 
   const calendarQueryParams = useMemo(() => {
     const params = {
@@ -185,8 +187,8 @@ const SubscriptionDetailPage = () => {
       year: monthFilter ? monthFilter.year() : dayjs().year(),
     };
 
-    if (searchTerm) {
-      params.search = searchTerm;
+    if (debouncedSearchTerm) {
+      params.search = debouncedSearchTerm;
     }
 
     if (statusFilter && statusFilter !== "all") {
@@ -194,7 +196,7 @@ const SubscriptionDetailPage = () => {
     }
 
     return params;
-  }, [monthFilter, searchTerm, statusFilter, subscriptionId]);
+  }, [monthFilter, debouncedSearchTerm, statusFilter, subscriptionId]);
 
   const { data: listBookingsResponse, isLoading: isListLoading } = useBookings(listQueryParams, {
     enabled: Boolean(subscriptionId) && activeView === VIEW_LIST,
