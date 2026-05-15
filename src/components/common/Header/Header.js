@@ -37,12 +37,15 @@ const Header = ({ onMenuClick, onMobileMenuClick }) => {
   }, [router]);
 
   const handleLogout = useCallback(() => {
-    dispatch(logout());
+    // Clear Cookies first so the new page knows we are logged out
     deleteCookie("access_token");
     deleteCookie("refresh_token");
     localStorage.removeItem("rememberedEmail");
-    router.push("/login");
-  }, [dispatch, router]);
+    
+    // Perform a full page reload. This clears all in-memory states (Redux, React Query, etc.)
+    // without the immediate UI "flicker" caused by manual dispatching.
+    window.location.href = "/login";
+  }, []);
 
   const handleProfileClick = useCallback(() => {
     router.push("/profile");

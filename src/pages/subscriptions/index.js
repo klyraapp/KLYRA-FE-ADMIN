@@ -29,12 +29,17 @@ import {
 import { formatDate, formatCurrency } from "@/utils/formatters";
 import { getSafeValue } from "@/utils/safeRendering";
 import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
+import LocationName from "@/components/common/LocationName";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 
 const SubscriptionsPage = () => {
   const { t } = useTranslation();
   const { can } = usePermission();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
 
   const [modalState, setModalState] = useState({
     type: null,
@@ -81,7 +86,12 @@ const SubscriptionsPage = () => {
     },
     { name: "createdAt", label: t("table.createdAt"), fullWidth: true },
     { name: "updatedAt", label: t("table.updatedAt"), fullWidth: true },
-  ], [t]);
+    ...((isSuperAdmin) ? [{
+      name: "serviceLocationId",
+      label: t("common.location") || "Location",
+      render: (val) => <LocationName id={val} />,
+    }] : []),
+  ], [t, isSuperAdmin]);
 
   const SUBSCRIPTION_STATUS_OPTIONS = useMemo(() => [
     { value: "all", label: t("filters.statusAll") },
@@ -112,6 +122,7 @@ const SubscriptionsPage = () => {
   const { getSubscriptionsColumns } = useTableColumns();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
 
   const queryParams = useMemo(() => {
@@ -124,8 +135,12 @@ const SubscriptionsPage = () => {
       params.search = searchTerm;
     }
 
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+
     return params;
-  }, [searchTerm, pagination]);
+  }, [searchTerm, locationFilter, pagination]);
 
   const { data: subscriptionsResponse, isLoading } = useSubscriptions(queryParams);
 
@@ -191,8 +206,24 @@ const SubscriptionsPage = () => {
         options: statusOptions,
         rules: [{ required: true, message: t("table.status") }],
       },
+      ...(isSuperAdmin
+        ? [
+            {
+              name: "serviceLocationId",
+              label: t("common.location") || "Location",
+              type: "custom",
+              component: (props) => <ServiceLocationSelector {...props} />,
+              rules: [
+                {
+                  required: true,
+                  message: t("common.locationRequired") || "Required",
+                },
+              ],
+            },
+          ]
+        : []),
     ],
-    [t, statusOptions, disabledDate],
+    [t, statusOptions, disabledDate, isSuperAdmin],
   );
 
   const handleSearch = useCallback((value) => {
@@ -202,6 +233,11 @@ const SubscriptionsPage = () => {
 
   const handleStatusChange = useCallback((value) => {
     setStatusFilter(value);
+    setPagination((prev) => ({ ...prev, skip: 0 }));
+  }, []);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
     setPagination((prev) => ({ ...prev, skip: 0 }));
   }, []);
 
@@ -290,13 +326,23 @@ const SubscriptionsPage = () => {
         <PageHeader
           titleKey="pages.subscriptions.title"
           subtitleKey="pages.subscriptions.subtitle"
-        />
+        >
+          {isSuperAdmin && (
+            <ServiceLocationSelector
+              value={locationFilter}
+              onChange={handleLocationChange}
+              showAllOption
+              style={{ width: 180 }}
+            />
+          )}
+        </PageHeader>
 
         <FiltersBar
           onStatusChange={handleStatusChange}
           showStatusFilter={false}
           showDateFilter={false}
           showSearch={false}
+          showLocationFilter={false}
         />
 
         <ErrorBoundary>

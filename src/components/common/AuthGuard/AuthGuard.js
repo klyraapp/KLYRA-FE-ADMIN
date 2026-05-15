@@ -31,8 +31,8 @@ const PUBLIC_ROUTES = [
 const dispatchUserPermissions = (dispatch, userData) => {
   const rawPermissions = userData?.permissions || [];
   const userRoles = (userData?.roles || []).map((role) => role?.name || "");
-  const isSuperAdmin = userRoles.some(
-    (roleName) => roleName.toLowerCase() === SUPER_ADMIN_ROLE,
+  const isSuperAdmin = (userData?.userRolePermissions || []).some(
+    (urp) => urp?.role?.type === "SUPER_ADMIN",
   );
 
   const normalized = normalizePermissions(rawPermissions);

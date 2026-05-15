@@ -8,6 +8,7 @@ import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import DetailModal from "@/components/common/DetailModal";
 import ExportSettingsModal from "@/components/export/ExportSettingsModal";
 import PageHeader from "@/components/PageHeader/PageHeader";
+import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import PageGuard from "@/components/common/RBAC/PageGuard";
 import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
 import PrimaryButton from "@/components/PrimaryButton/PrimaryButton";
@@ -38,8 +39,12 @@ const AdditionalServicesPage = () => {
     open: false,
   });
 
-  const { data: extraServices = [], isLoading } = useExtraServices();
-  const { data: services = [] } = useServices();
+  const queryParams = useMemo(() => {
+    return {};
+  }, []);
+
+  const { data: extraServices = [], isLoading } = useExtraServices(queryParams);
+  const { data: services = [] } = useServices(queryParams);
   const { mutate: deleteExtraService, isPending: isDeleting } =
     useDeleteExtraService();
   const { mutate: updateExtraService, isPending: isUpdating } =
@@ -200,6 +205,15 @@ const AdditionalServicesPage = () => {
           subtitleKey="pages.additionalServices.subtitle"
           actions={headerActions}
         />
+
+        <div className={styles.filtersWrapper}>
+          <FiltersBar
+            showSearch={false}
+            showStatusFilter={false}
+            showDateFilter={false}
+            showLocationFilter={false}
+          />
+        </div>
 
         <div className={styles.cardsGrid}>
           <ErrorBoundary>

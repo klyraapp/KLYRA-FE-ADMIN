@@ -8,19 +8,37 @@ import { useTranslation } from "@/hooks/useTranslation";
 // `useTheme` import kept commented along with the dark-mode row below.
 // import { useTheme } from "@/theme/ThemeProvider";
 import { Select, Switch } from "antd";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import SettingsCard from "../../components/Settings/SettingsCard";
 import SettingsRow from "../../components/Settings/SettingsRow";
 import PageGuard from "@/components/common/RBAC/PageGuard";
+import PageHeader from "@/components/PageHeader/PageHeader";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
+import FiltersBar from "@/components/FiltersBar/FiltersBar";
 import { PERMISSION_KEYS } from "@/utils/permissionConstants";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import { useLocation } from "@/context/LocationContext";
 import styles from "../../styles/settingsPage.module.css";
 
 const SettingsPage = () => {
   const { t } = useTranslation();
-  // Dark-mode toggle is currently disabled in the UI; see commented row below.
-  // const { isDarkMode, toggleTheme } = useTheme();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
   const { currentLanguage, changeLanguage } = useLanguage();
+  const { locations } = useLocation();
   const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const [locationFilter, setLocationFilter] = useState(null);
+
+  // Auto-select the first available service location if none selected
+  useEffect(() => {
+    if (locations.length > 0 && !locationFilter) {
+      setLocationFilter(locations[0].id);
+    }
+  }, [locations, locationFilter]);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
+  }, []);
 
   const LANGUAGE_OPTIONS = useMemo(
     () => [
@@ -43,10 +61,19 @@ const SettingsPage = () => {
 
   return (
     <div className={styles.pageContainer}>
-      <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t("settings.title")}</h1>
-        <p className={styles.pageBreadcrumb}>{t("settings.title")}</p>
-      </header>
+      <PageHeader
+        title={t("settings.title")}
+        subtitle={t("settings.title")}
+      >
+        {isSuperAdmin && (
+          <ServiceLocationSelector
+            value={locationFilter}
+            onChange={handleLocationChange}
+            style={{ width: 180 }}
+          />
+        )}
+      </PageHeader>
+
       <main className={styles.pageContent}>
         <SettingsCard title={t("settings.general")}>
           <SettingsRow label={t("settings.businessInfo")} />
@@ -71,7 +98,10 @@ const SettingsPage = () => {
             />
           </SettingsRow>
         </SettingsCard>
-        <AppSettingsSection />
+        <AppSettingsSection
+          serviceLocationId={locationFilter}
+          isSuperAdmin={isSuperAdmin}
+        />
       </main>
     </div>
   );

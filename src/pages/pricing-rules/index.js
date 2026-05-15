@@ -276,10 +276,10 @@ const PricingRulesPage = () => {
       <FiltersBar
         searchPlaceholder="Search pricing rules..."
         onSearch={handleSearch}
-        onStatusChange={handleStatusChange}
         onDateChange={handleDateChange}
         showStatusFilter={false}
         showDateFilter
+        showLocationFilter={false}
       />
 
       <ErrorBoundary>

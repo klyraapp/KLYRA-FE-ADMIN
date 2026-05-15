@@ -14,6 +14,19 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
+}
+
+.subtitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.subtitleActions {
+  display: flex;
+  align-items: center;
 }
 
 .title {

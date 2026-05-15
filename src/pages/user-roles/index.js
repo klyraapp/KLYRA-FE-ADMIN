@@ -20,18 +20,32 @@ import useTableColumns from "@/hooks/useTableColumns";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Tag } from "antd";
 import { useCallback, useMemo, useState } from "react";
+import FiltersBar from "@/components/FiltersBar/FiltersBar";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
 import styles from "@/styles/RoleManagement.module.css";
 
 const UserRolesPage = () => {
   const { t } = useTranslation();
   const { can } = usePermission();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
   const { getUserRolesColumns } = useTableColumns();
   
+  const [locationFilter, setLocationFilter] = useState(null);
   const [modalState, setModalState] = useState({
     type: null,
     data: null,
     open: false,
   });
+
+  const userParams = useMemo(() => {
+    const params = {};
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+    return params;
+  }, [locationFilter]);
 
   const {
     users,
@@ -43,7 +57,11 @@ const UserRolesPage = () => {
     isUpdating,
     deleteAdmin,
     isDeleting,
-  } = useUserRoles();
+  } = useUserRoles(userParams);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
+  }, []);
 
   const openModal = useCallback((type, data = null) => {
     setModalState({ type, data, open: true });
@@ -126,11 +144,20 @@ const UserRolesPage = () => {
           title={t("pages.userRoles.title") || "User Role Assignment"}
           subtitle={t("pages.userRoles.subtitle") || "Assign and manage roles for users"}
           actions={
-            can(PERMISSION_KEYS.USER_CREATE) && (
-              <PrimaryButton onClick={() => openModal("create")}>
-                {t("pages.userRoles.addUser") || "Add User"}
-              </PrimaryButton>
-            )
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "12px" }}>
+              {can(PERMISSION_KEYS.USER_CREATE) && (
+                <PrimaryButton onClick={() => openModal("create")}>
+                  {t("pages.userRoles.addUser") || "Add User"}
+                </PrimaryButton>
+              )}
+              {isSuperAdmin && (
+                <ServiceLocationSelector
+                  value={locationFilter}
+                  onChange={handleLocationChange}
+                  style={{ width: 180 }}
+                />
+              )}
+            </div>
           }
         />
 

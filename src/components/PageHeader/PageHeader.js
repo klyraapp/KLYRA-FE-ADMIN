@@ -9,7 +9,7 @@ import PropTypes from "prop-types";
 import { memo } from "react";
 import styles from "./PageHeader.module.css";
 
-const PageHeader = ({ title, subtitle, actions, titleKey, subtitleKey }) => {
+const PageHeader = ({ title, subtitle, actions, titleKey, subtitleKey, children }) => {
   const { t } = useTranslation();
 
   const displayTitle = titleKey ? t(titleKey) : title;
@@ -19,9 +19,12 @@ const PageHeader = ({ title, subtitle, actions, titleKey, subtitleKey }) => {
     <div className={styles.header}>
       <div className={styles.titleSection}>
         <h1 className={styles.title}>{displayTitle}</h1>
-        {displaySubtitle && (
-          <p className={styles.subtitle}>{displaySubtitle}</p>
-        )}
+        <div className={styles.subtitleRow}>
+          {displaySubtitle && (
+            <p className={styles.subtitle}>{displaySubtitle}</p>
+          )}
+          {children && <div className={styles.subtitleActions}>{children}</div>}
+        </div>
       </div>
       {actions && <div className={styles.actions}>{actions}</div>}
     </div>

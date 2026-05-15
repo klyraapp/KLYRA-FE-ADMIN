@@ -17,7 +17,7 @@ const RolesTableTop = ({ handleOpenModal }) => {
   const { t } = useTranslation();
 
   return (
-    <div style={{ textAlign: "right", marginBottom: 16 }}>
+    <div style={{ textAlign: "right", marginBottom: 0 }}>
       <PermissionGuard permission={PERMISSION_KEYS.ROLE_CREATE}>
         <Button
           type="primary"

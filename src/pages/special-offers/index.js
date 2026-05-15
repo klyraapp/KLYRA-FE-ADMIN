@@ -26,15 +26,21 @@ import usePermission from "@/hooks/usePermission";
 import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import PageGuard from "@/components/common/RBAC/PageGuard";
 import PermissionGuard from "@/components/common/RBAC/PermissionGuard";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
+import LocationName from "@/components/common/LocationName";
 
 const SpecialOffersPage = () => {
   const { t } = useTranslation();
   const { can } = usePermission();
   const { getSpecialOffersColumns } = useTableColumns();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
+  const [locationFilter, setLocationFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [modalState, setModalState] = useState({
@@ -80,8 +86,17 @@ const SpecialOffersPage = () => {
       { name: "validFrom", label: t("table.validFrom"), type: "date" },
       { name: "validTo", label: t("table.validTo"), type: "date" },
       { name: "isActive", label: t("common.active"), type: "switch" },
+      ...((isSuperAdmin) ? [{
+        name: "serviceLocationId",
+        label: t("common.location") || "Location",
+        type: "custom",
+        component: (props) => <ServiceLocationSelector {...props} />,
+        render: (val) => <LocationName id={val} />,
+        rules: [{ required: true, message: t("common.locationRequired") }],
+        fullWidth: true,
+      }] : []),
     ],
-    [t],
+    [t, isSuperAdmin],
   );
 
   const queryParams = useMemo(() => {
@@ -102,8 +117,12 @@ const SpecialOffersPage = () => {
       params.month = monthFilter.month() + 1;
     }
 
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+
     return params;
-  }, [debouncedSearchTerm, statusFilter, monthFilter, pagination]);
+  }, [debouncedSearchTerm, statusFilter, monthFilter, locationFilter, pagination]);
 
   const { data: offersResponse, isLoading } = useOffers(queryParams);
 
@@ -146,6 +165,11 @@ const SpecialOffersPage = () => {
 
   const handleDateChange = useCallback((date) => {
     setMonthFilter(date);
+    setPagination((prev) => ({ ...prev, skip: 0 }));
+  }, []);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
     setPagination((prev) => ({ ...prev, skip: 0 }));
   }, []);
 
@@ -241,8 +265,11 @@ const SpecialOffersPage = () => {
         onSearch={handleSearch}
         onStatusChange={handleStatusChange}
         onDateChange={handleDateChange}
+        onLocationChange={handleLocationChange}
+        locationValue={locationFilter}
         showStatusFilter
         showDateFilter
+        showLocationFilter
       />
 
       <ErrorBoundary>

@@ -13,6 +13,8 @@ import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import CreateRoleModal from "@/components/Roles/CreateRole";
 import RolesTableTop from "@/components/Roles/RolesTableTop";
 import PageGuard from "@/components/common/RBAC/PageGuard";
+import FiltersBar from "@/components/FiltersBar/FiltersBar";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
 import usePermission from "@/hooks/usePermission";
 import useTableColumns from "@/hooks/useTableColumns";
 import { PERMISSION_KEYS } from "@/utils/permissionConstants";
@@ -24,21 +26,33 @@ import {
   useDeleteRole,
 } from "@/hooks/useRoles";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
 import { useCallback, useMemo, useState } from "react";
 import styles from "@/styles/RoleManagement.module.css";
 
 const RolesPage = () => {
   const { t } = useTranslation();
   const { can } = usePermission();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
   const { getRolesColumns } = useTableColumns();
 
+  const [locationFilter, setLocationFilter] = useState(null);
   const [modalState, setModalState] = useState({
     type: null,
     data: null,
     open: false,
   });
 
-  const { data: roles = [], isLoading: rolesLoading } = useRolesList();
+  const rolesParams = useMemo(() => {
+    const params = {};
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+    return params;
+  }, [locationFilter]);
+
+  const { data: roles = [], isLoading: rolesLoading } = useRolesList(rolesParams);
 
   const { data: permissionsData = [] } = usePermissionsList();
 
@@ -60,6 +74,10 @@ const RolesPage = () => {
   const handleOpenModal = useCallback(() => {
     openModal("create");
   }, [openModal]);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
+  }, []);
 
   const handleRowAction = useCallback(
     (action, record) => {
@@ -118,7 +136,19 @@ const RolesPage = () => {
         <PageHeader
           title={t("pages.roles.title") || "Role Management"}
           subtitle={t("pages.roles.subtitle") || "Manage roles and their permissions"}
-          actions={<RolesTableTop handleOpenModal={handleOpenModal} />}
+          actions={
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "12px" }}>
+              <RolesTableTop handleOpenModal={handleOpenModal} />
+              {isSuperAdmin && (
+                <ServiceLocationSelector
+                  value={locationFilter}
+                  onChange={handleLocationChange}
+                  showAllOption
+                  style={{ width: 180 }}
+                />
+              )}
+            </div>
+          }
         />
 
         <div className={styles.tableCard}>

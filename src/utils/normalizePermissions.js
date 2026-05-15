@@ -62,6 +62,8 @@ const ACTION_PREFIXES = [
   "import",
   "approve",
   "reject",
+  "validate",
+  "retry",
 ];
 
 /**
@@ -125,12 +127,13 @@ const normalizePermission = (raw = "") => {
     permissions: "permission",
     roles: "role",
     users: "user",
-    app_settings: "setting", // Map app_settings to setting
+    app_settings: "setting",
     pricing_rules: "pricing_rule",
     extra_services: "extra_service",
     reviews: "review",
     payments: "payment",
-    transactions: "payment", // Map transactions to payment
+    transactions: "payment",
+    service_locations: "service_location",
   };
 
   if (pluralToSingular[resource]) {

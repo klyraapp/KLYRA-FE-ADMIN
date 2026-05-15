@@ -7,7 +7,7 @@ import SettingsCard from "@/components/Settings/SettingsCard";
 import SettingsRow from "@/components/Settings/SettingsRow";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Button, InputNumber, Skeleton } from "antd";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { humanizeKey } from "../helpers/formatHelpers";
 import { useAppSettings, useUpdateAppSettings } from "../hooks/useAppSettings";
 
@@ -168,10 +168,17 @@ const SettingGroup = ({ settings, onSave, isUpdating, canUpdate }) => {
   );
 };
 
-const AppSettingsSection = () => {
+const AppSettingsSection = ({ serviceLocationId, isSuperAdmin }) => {
   const { t } = useTranslation();
   const { can } = usePermission();
-  const { data: appSettings, isLoading } = useAppSettings();
+
+  // Super admins: use the path-based endpoint (v2) with the selected location
+  // Regular admins: use the general endpoint (v1)
+  const pathLocationId = isSuperAdmin && serviceLocationId && serviceLocationId !== 'all' ? serviceLocationId : null;
+
+  const params = useMemo(() => ({}), []);
+
+  const { data: appSettings, isLoading } = useAppSettings(params, pathLocationId);
   const { mutate: updateSettings, isPending, variables } = useUpdateAppSettings();
 
   const handleSave = (id, data) => {

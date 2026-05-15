@@ -572,6 +572,7 @@ const ServicesPricingPage = () => {
         onDateChange={handleDateChange}
         showStatusFilter
         showDateFilter
+        showLocationFilter={false}
       />
 
       <AntTable

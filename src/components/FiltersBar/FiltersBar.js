@@ -8,6 +8,9 @@ import { CalendarOutlined, SearchOutlined } from "@ant-design/icons";
 import { DatePicker, Input, Select } from "antd";
 import PropTypes from "prop-types";
 import { memo, useCallback, useMemo } from "react";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "../common/ServiceLocationSelector";
 import styles from "./FiltersBar.module.css";
 
 const FiltersBar = ({
@@ -22,6 +25,9 @@ const FiltersBar = ({
   dateValue,
   statusValue,
   searchValue,
+  onLocationChange,
+  showLocationFilter = true,
+  locationValue,
   children,
 }) => {
   const { t } = useTranslation();
@@ -64,6 +70,17 @@ const FiltersBar = ({
     [onDateChange],
   );
 
+  const handleLocationChange = useCallback(
+    (value) => {
+      if (onLocationChange) {
+        onLocationChange(value);
+      }
+    },
+    [onLocationChange],
+  );
+
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
+
   return (
     <div className={styles.filtersBar}>
       {showSearch && (
@@ -95,6 +112,13 @@ const FiltersBar = ({
             value={dateValue}
             suffixIcon={<CalendarOutlined />}
             className={styles.datePicker}
+          />
+        )}
+        {isSuperAdmin && showLocationFilter && (
+          <ServiceLocationSelector
+            value={locationValue}
+            onChange={handleLocationChange}
+            style={{ width: 180 }}
           />
         )}
         {children}
@@ -136,6 +160,9 @@ FiltersBar.defaultProps = {
   dateValue: null,
   statusValue: "",
   searchValue: "",
+  onLocationChange: null,
+  showLocationFilter: true,
+  locationValue: null,
 };
 
 export default memo(FiltersBar);

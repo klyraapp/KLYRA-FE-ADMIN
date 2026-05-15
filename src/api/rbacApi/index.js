@@ -13,7 +13,7 @@ const PERMISSIONS_ENDPOINT = "/permissions";
  * Fetches all roles from the backend.
  * @returns {Promise} Axios response with roles data.
  */
-const fetchRoles = () => api.get(ROLES_ENDPOINT);
+const fetchRoles = (params = {}) => api.get(ROLES_ENDPOINT, { params });
 
 /**
  * Creates a new role with the given data.

@@ -19,11 +19,15 @@ import { ExportOutlined } from "@ant-design/icons";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
 import ExportSettingsModal from "@/components/export/ExportSettingsModal";
+import LocationName from "@/components/common/LocationName";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
 import { InputNumber, Select, Space } from "antd";
 import { useCallback, useMemo, useState } from "react";
 
 const PaymentsPage = () => {
   const { t } = useTranslation();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
   const { getPaymentsColumns } = useTableColumns();
 
   const PAYMENT_FIELDS = useMemo(() => [
@@ -62,7 +66,12 @@ const PaymentsPage = () => {
     { name: "failurereason", label: t("table.failureReason"), fullWidth: true },
     { name: "createdat", label: t("table.createdAt"), fullWidth: true, render: (val) => formatDate(val) },
     { name: "updatedat", label: t("table.updatedAt"), fullWidth: true, render: (val) => formatDate(val) },
-  ], [t]);
+    ...((isSuperAdmin) ? [{
+      name: "serviceLocationId",
+      label: t("common.location") || "Location",
+      render: (val) => <LocationName id={val} />,
+    }] : []),
+  ], [t, isSuperAdmin]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -74,6 +83,7 @@ const PaymentsPage = () => {
     updatedAt: null,
   });
   const [orderFilter, setOrderFilter] = useState("DESC");
+  const [locationFilter, setLocationFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [modalState, setModalState] = useState({
@@ -121,8 +131,12 @@ const PaymentsPage = () => {
     if (debouncedExtraFilters.createdAt) params.createdAt = debouncedExtraFilters.createdAt.toISOString();
     if (debouncedExtraFilters.updatedAt) params.updatedAt = debouncedExtraFilters.updatedAt.toISOString();
 
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+
     return params;
-  }, [debouncedSearchTerm, statusFilter, orderFilter, debouncedExtraFilters, pagination]);
+  }, [debouncedSearchTerm, statusFilter, orderFilter, debouncedExtraFilters, locationFilter, pagination]);
 
   const { data: paymentsResponse, isLoading } = usePayments(queryParams);
 
@@ -141,6 +155,11 @@ const PaymentsPage = () => {
 
   const handleOrderChange = useCallback((value) => {
     setOrderFilter(value);
+    setPagination((prev) => ({ ...prev, skip: 0 }));
+  }, []);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
     setPagination((prev) => ({ ...prev, skip: 0 }));
   }, []);
 
@@ -204,9 +223,12 @@ const PaymentsPage = () => {
 
       <FiltersBar
         onStatusChange={handleStatusChange}
+        onLocationChange={handleLocationChange}
+        locationValue={locationFilter}
         showStatusFilter={true}
         showDateFilter={false}
         showSearch={false}
+        showLocationFilter={true}
         statusOptions={PAYMENT_STATUS_OPTIONS}
       >
         <Space wrap>

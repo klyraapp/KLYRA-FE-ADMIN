@@ -22,10 +22,11 @@ export const useUsers = (params = {}, options = {}) => {
     queryFn: async () => {
       const response = await getUsers(params);
       const rawData = response?.data?.records || response?.data || [];
+      const total = response?.data?.count || (Array.isArray(rawData) ? rawData.length : 0);
       
       const records = Array.isArray(rawData) ? rawData : [];
       
-      return records.map(user => ({
+      const mappedRecords = records.map(user => ({
         id: user?.id,
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -35,6 +36,8 @@ export const useUsers = (params = {}, options = {}) => {
         createdAt: user?.createdAt,
         ...user
       }));
+
+      return { records: mappedRecords, total };
     },
     staleTime: 5 * 60 * 1000,
     retry: false,
@@ -51,7 +54,7 @@ export const useAdmins = (params = {}, options = {}) => {
       // Structure: [[user1, user2], totalCount]
       const [records = [], count = 0] = response?.data || [[], 0];
       
-      return records.map(user => ({
+      const mappedRecords = records.map(user => ({
         id: user?.id,
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -61,6 +64,8 @@ export const useAdmins = (params = {}, options = {}) => {
         createdAt: user?.createdAt,
         ...user
       }));
+
+      return { records: mappedRecords, total: count };
     },
     staleTime: 5 * 60 * 1000,
     retry: false,

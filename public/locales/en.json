@@ -26,7 +26,11 @@
     "unknown": "Unknown",
     "selectAll": "Select All",
     "list": "List",
-    "dates": "Dates"
+    "dates": "Dates",
+    "location": "Location",
+    "allLocations": "All Locations",
+    "selectLocation": "Select Location",
+    "locationRequired": "Please select a location"
   },
   "status": {
     "active": "Active",

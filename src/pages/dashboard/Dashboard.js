@@ -10,23 +10,42 @@ import ServiceDistribution from "@/components/dashboard/ServiceDistribution/Serv
 import ServiceRequestChart from "@/components/dashboard/ServiceRequestChart/ServiceRequestChart";
 import StatsCard from "@/components/dashboard/StatsCard/StatsCard";
 import StatusBadge from "@/components/StatusBadge/StatusBadge";
+import FiltersBar from "@/components/FiltersBar/FiltersBar";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
 import { useDashboardData } from "@/hooks/useAnalytics";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Spin } from "antd";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
 import { safeMap } from "@/utils/safeRendering";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import { SIDEBAR_PERMISSIONS } from "@/utils/sidebarPermissions";
 import usePermission from "@/hooks/usePermission";
 import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
 import styles from "../../../styles/dashboard.module.css";
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { can, canAny } = usePermission();
-  const { data: dashboardData, isLoading } = useDashboardData();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
+  const [locationFilter, setLocationFilter] = useState(null);
+
+  const dashboardParams = useMemo(() => {
+    const params = {};
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+    return params;
+  }, [locationFilter]);
+
+  const { data: dashboardData, isLoading } = useDashboardData(dashboardParams);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
+  }, []);
 
   // Redirect to the first available route if user doesn't have dashboard access
   useEffect(() => {
@@ -205,7 +224,16 @@ const Dashboard = () => {
       <DashboardHeader
         titleKey="pages.dashboard.title"
         subtitleKey="pages.dashboard.subtitle"
-      />
+      >
+        {isSuperAdmin && (
+          <ServiceLocationSelector
+            value={locationFilter}
+            onChange={handleLocationChange}
+            showAllOption
+            style={{ width: 180 }}
+          />
+        )}
+      </DashboardHeader>
 
       <div className={styles.statsGrid}>
         <ErrorBoundary>

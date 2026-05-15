@@ -15,11 +15,11 @@ import useToast from "./useToast";
 
 const EXTRA_SERVICES_QUERY_KEY = "extraServices";
 
-export const useExtraServices = (options = {}) => {
+export const useExtraServices = (params = {}, options = {}) => {
   return useQuery({
-    queryKey: [EXTRA_SERVICES_QUERY_KEY],
+    queryKey: [EXTRA_SERVICES_QUERY_KEY, params],
     queryFn: async () => {
-      const response = await getExtraServices();
+      const response = await getExtraServices(params);
       return response?.data || [];
     },
     staleTime: 5 * 60 * 1000,

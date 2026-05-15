@@ -15,7 +15,7 @@ export const useDashboardStats = () => {
 
   const bookings = Array.isArray(bookingsData) ? bookingsData : [];
   const services = Array.isArray(servicesData) ? servicesData : [];
-  const users = Array.isArray(usersData) ? usersData : [];
+  const users = usersData?.records || [];
 
   const stats = useMemo(() => {
     const totalBookings = bookings?.length || 0;

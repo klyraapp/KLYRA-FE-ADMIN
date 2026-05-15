@@ -13,4 +13,5 @@ export * from "./servicesApi";
 export * from "./subscriptionsApi";
 export * from "./userApi";
 export * from "./rbacApi";
+export * from "./serviceLocationApi";
 

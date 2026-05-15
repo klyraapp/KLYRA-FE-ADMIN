@@ -32,6 +32,10 @@ import { formatDate } from "@/utils/formatters";
 import { ExportOutlined } from "@ant-design/icons";
 import { Select } from "antd";
 import { useCallback, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
+import LocationName from "@/components/common/LocationName";
 import styles from "@/styles/customers.module.css";
 
 const CustomersPage = () => {
@@ -41,6 +45,7 @@ const CustomersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
+  const [locationFilter, setLocationFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
   const [orderFilter, setOrderFilter] = useState("DESC");
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -49,6 +54,7 @@ const CustomersPage = () => {
     data: null,
     open: false,
   });
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
 
   const CUSTOMER_EDIT_FIELDS = useMemo(
     () => [
@@ -83,8 +89,20 @@ const CustomersPage = () => {
           { value: "ar", label: "Arabic" },
         ],
       },
+      ...((isSuperAdmin) ? [{
+        name: "serviceLocationId",
+        label: t("common.location") || "Location",
+        type: "custom",
+        component: (props) => <ServiceLocationSelector {...props} />,
+        rules: [
+          {
+            required: true,
+            message: t("common.locationRequired") || "Required",
+          },
+        ],
+      }] : []),
     ],
-    [t],
+    [t, isSuperAdmin],
   );
 
   const CUSTOMER_FIELDS = useMemo(
@@ -114,8 +132,13 @@ const CustomersPage = () => {
           { value: "ar", label: "Arabic" },
         ],
       },
+      ...((isSuperAdmin) ? [{
+        name: "serviceLocationId",
+        label: t("common.location") || "Location",
+        render: (val) => <LocationName id={val} />,
+      }] : []),
     ],
-    [t],
+    [t, isSuperAdmin],
   );
 
   const CUSTOMER_CREATE_FIELDS = useMemo(
@@ -151,8 +174,24 @@ const CustomersPage = () => {
           { value: "ar", label: "Arabic" },
         ],
       },
+      ...(isSuperAdmin
+        ? [
+            {
+              name: "serviceLocationId",
+              label: t("common.location") || "Location",
+              type: "custom",
+              component: (props) => <ServiceLocationSelector {...props} />,
+              rules: [
+                {
+                  required: true,
+                  message: t("common.locationRequired") || "Required",
+                },
+              ],
+            },
+          ]
+        : []),
     ],
-    [t],
+    [t, isSuperAdmin],
   );
 
   const ORDER_OPTIONS = useMemo(
@@ -187,10 +226,16 @@ const CustomersPage = () => {
       params.order = orderFilter;
     }
 
-    return params;
-  }, [debouncedSearchTerm, statusFilter, monthFilter, orderFilter, pagination]);
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
 
-  const { data: customers = [], isLoading } = useUsers(queryParams);
+    return params;
+  }, [debouncedSearchTerm, statusFilter, monthFilter, orderFilter, locationFilter, pagination]);
+
+  const { data: usersData, isLoading } = useUsers(queryParams);
+  const customers = usersData?.records || [];
+  const totalCount = usersData?.total || 0;
   const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
   const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
   const { mutate: createUser, isPending: isCreating } = useCreateUser();
@@ -208,6 +253,7 @@ const CustomersPage = () => {
       totalSpent: "0 NOK",
       joinDate: formatDate(customer?.createdAt),
       status: customer?.isActive ? "active" : "inactive",
+      serviceLocationIds: customer?.serviceLocationIds,
       originalData: customer,
     }), []);
   }, [customers]);
@@ -244,6 +290,11 @@ const CustomersPage = () => {
 
   const handleDateChange = useCallback((date) => {
     setMonthFilter(date);
+    setPagination((prev) => ({ ...prev, skip: 0 }));
+  }, []);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
     setPagination((prev) => ({ ...prev, skip: 0 }));
   }, []);
 
@@ -343,8 +394,11 @@ const CustomersPage = () => {
           onSearch={handleSearch}
           onStatusChange={handleStatusChange}
           onDateChange={handleDateChange}
+          onLocationChange={handleLocationChange}
+          locationValue={locationFilter}
           showStatusFilter
           showDateFilter
+          showLocationFilter
         >
           <Select
             placeholder={t("filters.sortBy")}
@@ -367,7 +421,7 @@ const CustomersPage = () => {
             pagination={{
               current: Math.floor(pagination.skip / pagination.take) + 1,
               pageSize: pagination.take,
-              total: transformedData.length,
+              total: totalCount,
             }}
             onChange={(paginationConfig) => {
               if (paginationConfig?.current && paginationConfig?.pageSize) {

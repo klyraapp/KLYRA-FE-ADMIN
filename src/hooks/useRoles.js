@@ -24,11 +24,11 @@ const PERMISSIONS_QUERY_KEY = "permissions";
  * @param {object} options - Additional react-query options.
  * @returns {import("@tanstack/react-query").UseQueryResult}
  */
-const useRolesList = (options = {}) => {
+const useRolesList = (params = {}, options = {}) => {
   return useQuery({
-    queryKey: [ROLES_QUERY_KEY],
+    queryKey: [ROLES_QUERY_KEY, params],
     queryFn: async () => {
-      const response = await fetchRoles();
+      const response = await fetchRoles(params);
       return response?.data || [];
     },
     staleTime: 5 * 60 * 1000,

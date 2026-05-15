@@ -12,6 +12,9 @@ import { usePermissionsList, useRolePermissions } from "@/hooks/useRoles";
 import { Checkbox } from "antd";
 import PropTypes from "prop-types";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "../common/ServiceLocationSelector";
 import styles from "@/styles/RoleManagement.module.css";
 
 const UserRoleModal = ({
@@ -28,6 +31,7 @@ const UserRoleModal = ({
   const [showDirectPermissions, setShowDirectPermissions] = useState(false);
   const [baseRolePermIds, setBaseRolePermIds] = useState([]);
   const [lockedPermissionIds, setLockedPermissionIds] = useState([]);
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
 
   // Fetch all permissions for the list
   const { data: allPermissions = [] } = usePermissionsList({
@@ -91,13 +95,13 @@ const UserRoleModal = ({
     if (open && isRolePermissionsLoaded && rolePermissions.length > 0) {
       const pIds = rolePermissions.map(rp => rp.permissionId || rp.id);
       setBaseRolePermIds(pIds);
-      
+
       const originalRoleId = user?.userRolePermission?.find(urp => urp.role)?.roleId;
-      
+
       // If the role has changed, update the selections and lock the new role's permissions
       if (selectedRoleId !== originalRoleId || !user) {
-         setSelectedPermissionIds(pIds);
-         setLockedPermissionIds(pIds);
+        setSelectedPermissionIds(pIds);
+        setLockedPermissionIds(pIds);
       }
     } else if (open && isRolePermissionsLoaded && rolePermissions.length === 0 && selectedRoleId) {
       // Handle the case where a role might have 0 permissions
@@ -129,6 +133,7 @@ const UserRoleModal = ({
           email: values.email,
           phone: values.phone,
           password: values.password,
+          // serviceLocationId: values.serviceLocationId,
           roles: values.roles ? [values.roles] : [],
           permissions: selectedPermissionIds,
           userSettings: { isTwoFactorAuth: false },
@@ -141,8 +146,8 @@ const UserRoleModal = ({
       const currentRoleId = values.roles;
       const previousRoles = user.userRolePermission
         ? user.userRolePermission
-            .filter((urp) => urp.roleId)
-            .map((urp) => urp.roleId)
+          .filter((urp) => urp.roleId)
+          .map((urp) => urp.roleId)
         : [];
       const currentRoles = currentRoleId ? [currentRoleId] : [];
 
@@ -150,8 +155,8 @@ const UserRoleModal = ({
       // Any permission in selectedPermissionIds that is not provided by the base role is a direct permission
       const previousDirectPermissions = user.userRolePermission
         ? user.userRolePermission
-            .filter((urp) => !urp.roleId && urp.permissionId)
-            .map((urp) => urp.permissionId)
+          .filter((urp) => !urp.roleId && urp.permissionId)
+          .map((urp) => urp.permissionId)
         : [];
 
       const currentDirectPermissions = selectedPermissionIds.filter(
@@ -163,6 +168,7 @@ const UserRoleModal = ({
         phone: values.phone || "",
         firstName: values.firstName,
         lastName: values.lastName,
+        // serviceLocationId: values.serviceLocationId,
         fcmToken: user.fcmToken || "",
         languagePreference: user.languagePreference || "en",
         newRoles: currentRoles.filter((id) => !previousRoles.includes(id)),
@@ -194,8 +200,8 @@ const UserRoleModal = ({
     ? `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || user?.email
     : "";
 
-  const fields = useMemo(
-    () => [
+  const fields = useMemo(() => {
+    const baseFields = [
       {
         name: "firstName",
         label: t("fields.firstName") || "First Name",
@@ -240,9 +246,22 @@ const UserRoleModal = ({
         fullWidth: true,
         onChange: (val) => setSelectedRoleId(val),
       },
-    ],
-    [t, roleOptions, user],
-  );
+    ];
+
+    // if (isSuperAdmin) {
+    //   baseFields.push({
+    //     name: "serviceLocationId",
+    //     label: t("common.location") || "Location",
+    //     type: "custom",
+    //     component: (props) => <ServiceLocationSelector {...props} />,
+    //     render: (val) => <LocationName id={val} />,
+    //     rules: [{ required: true, message: t("common.locationRequired") || "Required" }],
+    //     fullWidth: true,
+    //   });
+    // }
+
+    return baseFields;
+  }, [t, roleOptions, user, isSuperAdmin]);
 
   const initialData = useMemo(() => {
     const roleEntry = user?.userRolePermission?.find(urp => urp.roleId && urp.role);
@@ -254,6 +273,7 @@ const UserRoleModal = ({
       email: user?.email || "",
       phone: user?.phone || "",
       roles: currentRoleId,
+      // serviceLocationId: user?.serviceLocationId,
     };
   }, [user]);
 

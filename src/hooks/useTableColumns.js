@@ -8,10 +8,15 @@ import { getSafeValue } from "@/utils/safeRendering";
 import { Tooltip, Tag } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
 import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
 import { useTranslation } from "./useTranslation";
+import { useLocation } from "@/context/LocationContext";
 
 const useTableColumns = () => {
   const { t } = useTranslation();
+  const { getLocationName } = useLocation();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
 
   const getCustomersColumns = useMemo(
     () => (handleRowAction, styles, StatusBadge, ActionMenu, canUpdate = false, canDelete = false) => [
@@ -52,6 +57,33 @@ const useTableColumns = () => {
         width: 100,
         render: (status) => <StatusBadge status={status} />,
       },
+      ...((isSuperAdmin) ? [{
+        title: t("common.location") || "Location",
+        dataIndex: "serviceLocationIds",
+        key: "location",
+        width: 100,
+        render: (id) => {
+          if (Array.isArray(id)) {
+            if (id.length === 0) return "-";
+            const names = id.map((i) => getLocationName(i));
+            return (
+              <Tooltip title={names.join(", ")}>
+                <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                  <Tag color="blue" style={{ margin: 0 }}>
+                    {names[0]}
+                  </Tag>
+                  {id.length > 1 && (
+                    <Tag color="blue" style={{ margin: 0 }}>
+                      +{id.length - 1}
+                    </Tag>
+                  )}
+                </div>
+              </Tooltip>
+            );
+          }
+          return getLocationName(id);
+        },
+      }] : []),
       {
         title: t("table.actions"),
         key: "actions",
@@ -72,7 +104,7 @@ const useTableColumns = () => {
         ),
       },
     ],
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getBookingsColumns = useMemo(
@@ -197,6 +229,13 @@ const useTableColumns = () => {
               <StatusBadge status={formatBookingStatus(status)} />
             ),
           },
+          ...((isSuperAdmin) ? [{
+            title: t("common.location") || "Location",
+            dataIndex: "serviceLocationId",
+            key: "location",
+            width: 100,
+            render: (id) => getLocationName(id),
+          }] : []),
           {
             title: t("table.adminNotes") || "Admin Notes",
             dataIndex: "adminNotes",
@@ -238,7 +277,7 @@ const useTableColumns = () => {
             ),
           },
         ],
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getServicesColumns = useMemo(
@@ -252,67 +291,67 @@ const useTableColumns = () => {
         canUpdate = false,
         canDelete = false,
       ) => [
-        {
-          title: t("table.serviceId"),
-          dataIndex: "id",
-          key: "id",
-          width: 80,
-        },
-        {
-          title: t("table.serviceName"),
-          dataIndex: "name",
-          key: "name",
-          width: 200,
-        },
-        {
-          title: t("table.description"),
-          dataIndex: "description",
-          key: "description",
-          width: 300,
-          ellipsis: true,
-        },
-        {
-          title: t("table.price"),
-          key: "price",
-          width: 120,
-          render: (_, record) => {
-            const pricingRules = record?.pricingRules || [];
-            const baseRule =
-              pricingRules.find((rule) => rule.ruleType === "BASE") ||
-              pricingRules[0];
-            return baseRule ? formatCurrency(baseRule.price) : "-";
+          {
+            title: t("table.serviceId"),
+            dataIndex: "id",
+            key: "id",
+            width: 80,
           },
-        },
-        {
-          title: t("table.status"),
-          dataIndex: "isActive",
-          key: "status",
-          width: 100,
-          render: (isActive) => (
-            <StatusBadge status={isActive ? "active" : "inactive"} />
-          ),
-        },
-        {
-          title: t("table.actions"),
-          key: "actions",
-          width: 80,
-          align: "center",
-          render: (_, record) => (
-            <ActionMenu
-              onAction={handleRowAction}
-              record={record}
-              items={[
-                { key: "view", label: t("common.view") },
-                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
-                ...(canDelete
-                  ? [{ key: "delete", label: t("common.delete") }]
-                  : []),
-              ]}
-            />
-          ),
-        },
-      ],
-    [t],
+          {
+            title: t("table.serviceName"),
+            dataIndex: "name",
+            key: "name",
+            width: 200,
+          },
+          {
+            title: t("table.description"),
+            dataIndex: "description",
+            key: "description",
+            width: 300,
+            ellipsis: true,
+          },
+          {
+            title: t("table.price"),
+            key: "price",
+            width: 120,
+            render: (_, record) => {
+              const pricingRules = record?.pricingRules || [];
+              const baseRule =
+                pricingRules.find((rule) => rule.ruleType === "BASE") ||
+                pricingRules[0];
+              return baseRule ? formatCurrency(baseRule.price) : "-";
+            },
+          },
+          {
+            title: t("table.status"),
+            dataIndex: "isActive",
+            key: "status",
+            width: 100,
+            render: (isActive) => (
+              <StatusBadge status={isActive ? "active" : "inactive"} />
+            ),
+          },
+          {
+            title: t("table.actions"),
+            key: "actions",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <ActionMenu
+                onAction={handleRowAction}
+                record={record}
+                items={[
+                  { key: "view", label: t("common.view") },
+                  ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                  ...(canDelete
+                    ? [{ key: "delete", label: t("common.delete") }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getDiscountCodesColumns = useMemo(
@@ -326,64 +365,71 @@ const useTableColumns = () => {
         canUpdate = false,
         canDelete = false,
       ) => [
-        {
-          title: t("table.code"),
-          dataIndex: "code",
-          key: "code",
-          width: 150,
-        },
-        {
-          title: t("table.discount"),
-          dataIndex: "discountValue",
-          key: "discount",
-          width: 120,
-          render: (value, record) =>
-            record.discountType === "PERCENTAGE" ? `${value}%` : `${value} NOK`,
-        },
-        {
-          title: t("table.validFrom"),
-          dataIndex: "validFrom",
-          key: "validFrom",
-          width: 140,
-          render: (date) => formatDate(date),
-        },
-        {
-          title: t("table.validTo"),
-          dataIndex: "validUntil",
-          key: "validTo",
-          width: 140,
-          render: (date) => formatDate(date),
-        },
-        {
-          title: t("table.status"),
-          dataIndex: "isActive",
-          key: "status",
-          width: 100,
-          render: (isActive) => (
-            <StatusBadge status={isActive ? "active" : "inactive"} />
-          ),
-        },
-        {
-          title: t("table.actions"),
-          key: "actions",
-          width: 80,
-          align: "center",
-          render: (_, record) => (
-            <ActionMenu
-              onAction={handleRowAction}
-              record={record}
-              items={[
-                { key: "view", label: t("common.view") },
-                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
-                ...(canDelete
-                  ? [{ key: "delete", label: t("common.delete") }]
-                  : []),
-              ]}
-            />
-          ),
-        },
-      ],
-    [t],
+          {
+            title: t("table.code"),
+            dataIndex: "code",
+            key: "code",
+            width: 150,
+          },
+          {
+            title: t("table.discount"),
+            dataIndex: "discountValue",
+            key: "discount",
+            width: 120,
+            render: (value, record) =>
+              record.discountType === "PERCENTAGE" ? `${value}%` : `${value} NOK`,
+          },
+          {
+            title: t("table.validFrom"),
+            dataIndex: "validFrom",
+            key: "validFrom",
+            width: 140,
+            render: (date) => formatDate(date),
+          },
+          {
+            title: t("table.validTo"),
+            dataIndex: "validUntil",
+            key: "validTo",
+            width: 140,
+            render: (date) => formatDate(date),
+          },
+          {
+            title: t("table.status"),
+            dataIndex: "isActive",
+            key: "status",
+            width: 100,
+            render: (isActive) => (
+              <StatusBadge status={isActive ? "active" : "inactive"} />
+            ),
+          },
+          ...((isSuperAdmin) ? [{
+            title: t("common.location") || "Location",
+            dataIndex: "serviceLocationId",
+            key: "location",
+            width: 100,
+            render: (id) => getLocationName(id),
+          }] : []),
+          {
+            title: t("table.actions"),
+            key: "actions",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <ActionMenu
+                onAction={handleRowAction}
+                record={record}
+                items={[
+                  { key: "view", label: t("common.view") },
+                  ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                  ...(canDelete
+                    ? [{ key: "delete", label: t("common.delete") }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getAdditionalServicesColumns = useMemo(
@@ -397,62 +443,62 @@ const useTableColumns = () => {
         canUpdate = false,
         canDelete = false,
       ) => [
-        {
-          title: t("table.serviceId"),
-          dataIndex: "id",
-          key: "id",
-          width: 80,
-        },
-        {
-          title: t("table.serviceName"),
-          dataIndex: "name",
-          key: "name",
-          width: 200,
-        },
-        {
-          title: t("table.description"),
-          dataIndex: "description",
-          key: "description",
-          width: 300,
-          ellipsis: true,
-        },
-        {
-          title: t("table.price"),
-          dataIndex: "price",
-          key: "price",
-          width: 120,
-          render: (price) => formatCurrency(price),
-        },
-        {
-          title: t("table.status"),
-          dataIndex: "isActive",
-          key: "status",
-          width: 100,
-          render: (isActive) => (
-            <StatusBadge status={isActive ? "active" : "inactive"} />
-          ),
-        },
-        {
-          title: t("table.actions"),
-          key: "actions",
-          width: 80,
-          align: "center",
-          render: (_, record) => (
-            <ActionMenu
-              onAction={handleRowAction}
-              record={record}
-              items={[
-                { key: "view", label: t("common.view") },
-                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
-                ...(canDelete
-                  ? [{ key: "delete", label: t("common.delete") }]
-                  : []),
-              ]}
-            />
-          ),
-        },
-      ],
-    [t],
+          {
+            title: t("table.serviceId"),
+            dataIndex: "id",
+            key: "id",
+            width: 80,
+          },
+          {
+            title: t("table.serviceName"),
+            dataIndex: "name",
+            key: "name",
+            width: 200,
+          },
+          {
+            title: t("table.description"),
+            dataIndex: "description",
+            key: "description",
+            width: 300,
+            ellipsis: true,
+          },
+          {
+            title: t("table.price"),
+            dataIndex: "price",
+            key: "price",
+            width: 120,
+            render: (price) => formatCurrency(price),
+          },
+          {
+            title: t("table.status"),
+            dataIndex: "isActive",
+            key: "status",
+            width: 100,
+            render: (isActive) => (
+              <StatusBadge status={isActive ? "active" : "inactive"} />
+            ),
+          },
+          {
+            title: t("table.actions"),
+            key: "actions",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <ActionMenu
+                onAction={handleRowAction}
+                record={record}
+                items={[
+                  { key: "view", label: t("common.view") },
+                  ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                  ...(canDelete
+                    ? [{ key: "delete", label: t("common.delete") }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getSpecialOffersColumns = useMemo(
@@ -524,27 +570,34 @@ const useTableColumns = () => {
               <StatusBadge status={isActive ? "active" : "inactive"} />
             ),
           },
-        {
-          title: t("table.actions"),
-          key: "actions",
-          width: 80,
-          align: "center",
-          render: (_, record) => (
-            <ActionMenu
-              onAction={handleRowAction}
-              record={record}
-              items={[
-                { key: "view", label: t("common.view") },
-                ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
-                ...(canDelete
-                  ? [{ key: "delete", label: t("common.delete") }]
-                  : []),
-              ]}
-            />
-          ),
-        },
+          ...((isSuperAdmin) ? [{
+            title: t("common.location") || "Location",
+            dataIndex: "serviceLocationId",
+            key: "location",
+            width: 100,
+            render: (id) => getLocationName(id),
+          }] : []),
+          {
+            title: t("table.actions"),
+            key: "actions",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <ActionMenu
+                onAction={handleRowAction}
+                record={record}
+                items={[
+                  { key: "view", label: t("common.view") },
+                  ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                  ...(canDelete
+                    ? [{ key: "delete", label: t("common.delete") }]
+                    : []),
+                ]}
+              />
+            ),
+          },
         ],
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getPricingRulesColumns = useMemo(
@@ -684,7 +737,7 @@ const useTableColumns = () => {
 
         return columns;
       },
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
   const getSubscriptionsColumns = useMemo(
     () =>
@@ -697,135 +750,142 @@ const useTableColumns = () => {
         formatCurrency,
         canUpdate = false,
       ) => [
-        {
-          title: t("table.subscriptionId"),
-          dataIndex: "id",
-          key: "id",
-          width: 100,
-        },
-        {
-          title: t("table.status"),
-          dataIndex: "status",
-          key: "status",
-          width: 120,
-          render: (status) => {
-            const statusMap = {
-              ACTIVE: "paid",
-              PENDING: "unpaid",
-              CANCELLED: "cancelled",
-              EXPIRED: "expired",
-            };
-            return <StatusBadge status={statusMap[status] || "unpaid"} />;
+          {
+            title: t("table.subscriptionId"),
+            dataIndex: "id",
+            key: "id",
+            width: 100,
           },
-        },
-        {
-          title: t("table.contactName"),
-          key: "contactName",
-          width: 180,
-          render: (_, record) => {
-            const first = record?.contactFirstName || "";
-            const last = record?.contactLastName || "";
-            const full = `${first} ${last}`.trim();
-            return full || "-";
+          {
+            title: t("table.status"),
+            dataIndex: "status",
+            key: "status",
+            width: 120,
+            render: (status) => {
+              const statusMap = {
+                ACTIVE: "paid",
+                PENDING: "unpaid",
+                CANCELLED: "cancelled",
+                EXPIRED: "expired",
+              };
+              return <StatusBadge status={statusMap[status] || "unpaid"} />;
+            },
           },
-        },
-        {
-          title: t("table.email"),
-          dataIndex: "contactEmail",
-          key: "contactEmail",
-          width: 200,
-        },
-        {
-          title: t("table.recurringInterval"),
-          dataIndex: "recurringIntervalType",
-          key: "recurringIntervalType",
-          width: 140,
-          render: (type) => {
-            const classMap = {
-              WEEKLY: styles.intervalWeekly,
-              EVERY_SECOND_WEEK: styles.intervalBiweekly,
-              EVERY_THIRD_WEEK: styles.intervalTriweekly,
-              MONTHLY: styles.intervalMonthly,
-            };
-            const labelMap = {
-              WEEKLY: t("table.intervalWeekly"),
-              EVERY_SECOND_WEEK: t("table.intervalEverySecondWeek"),
-              EVERY_THIRD_WEEK: t("table.intervalEveryThirdWeek"),
-              MONTHLY: t("table.intervalMonthly"),
-            };
-            return (
-              <span
-                className={`${styles.intervalTag} ${classMap[type] || ""}`}
-              >
-                {labelMap[type] || type || "-"}
-              </span>
-            );
+          {
+            title: t("table.contactName"),
+            key: "contactName",
+            width: 180,
+            render: (_, record) => {
+              const first = record?.contactFirstName || "";
+              const last = record?.contactLastName || "";
+              const full = `${first} ${last}`.trim();
+              return full || "-";
+            },
           },
-        },
-        {
-          title: t("table.nextScheduledDate"),
-          dataIndex: "nextScheduledDate",
-          key: "nextScheduledDate",
-          width: 180,
-          render: (date, record) => {
-            const formattedDate =
-              typeof date === "string" ? date.split("T")[0] : "-";
-            const expectedPrice = record?.futureBookingExpectedPrice;
-
-            if (expectedPrice && record?.status !== "PENDING") {
+          {
+            title: t("table.email"),
+            dataIndex: "contactEmail",
+            key: "contactEmail",
+            width: 200,
+          },
+          {
+            title: t("table.recurringInterval"),
+            dataIndex: "recurringIntervalType",
+            key: "recurringIntervalType",
+            width: 140,
+            render: (type) => {
+              const classMap = {
+                WEEKLY: styles.intervalWeekly,
+                EVERY_SECOND_WEEK: styles.intervalBiweekly,
+                EVERY_THIRD_WEEK: styles.intervalTriweekly,
+                MONTHLY: styles.intervalMonthly,
+              };
+              const labelMap = {
+                WEEKLY: t("table.intervalWeekly"),
+                EVERY_SECOND_WEEK: t("table.intervalEverySecondWeek"),
+                EVERY_THIRD_WEEK: t("table.intervalEveryThirdWeek"),
+                MONTHLY: t("table.intervalMonthly"),
+              };
               return (
-                <Tooltip
-                  title={t("pages.subscriptions.expectedPrice").replace(
-                    "{price}",
-                    formatCurrency(expectedPrice),
-                  )}
+                <span
+                  className={`${styles.intervalTag} ${classMap[type] || ""}`}
                 >
-                  <span style={{ borderBottom: "1px dotted #ccc" }}>
-                    {formattedDate}
-                  </span>
-                </Tooltip>
+                  {labelMap[type] || type || "-"}
+                </span>
               );
-            }
-            return formattedDate;
+            },
           },
-        },
-        {
-          title: t("table.nextInvoicingDate"),
-          dataIndex: "nextInvoicingDate",
-          key: "nextInvoicingDate",
-          width: 180,
-          render: (date) =>
-            typeof date === "string" ? date.split("T")[0] : "-",
-        },
-        {
-          title: t("table.date"),
-          dataIndex: "createdAt",
-          key: "createdAt",
-          width: 140,
-          render: (date) => formatDate(date),
-        },
-        {
-          title: t("table.actions"),
-          key: "actions",
-          width: 80,
-          align: "center",
-          render: (_, record) => (
-            <div onClick={(e) => e.stopPropagation()}>
-              <ActionMenu
-                onAction={handleRowAction}
-                record={record}
-                items={[
-                  { key: "view", label: t("common.view") },
-                  ...(canUpdate && record.status !== "CANCELLED"
-                    ? [{ key: "edit", label: t("common.edit") }]
-                    : []),
-                ]}
-              />
-            </div>
-          ),
-        },
-      ],
-    [t],
+          {
+            title: t("table.nextScheduledDate"),
+            dataIndex: "nextScheduledDate",
+            key: "nextScheduledDate",
+            width: 180,
+            render: (date, record) => {
+              const formattedDate =
+                typeof date === "string" ? date.split("T")[0] : "-";
+              const expectedPrice = record?.futureBookingExpectedPrice;
+
+              if (expectedPrice && record?.status !== "PENDING") {
+                return (
+                  <Tooltip
+                    title={t("pages.subscriptions.expectedPrice").replace(
+                      "{price}",
+                      formatCurrency(expectedPrice),
+                    )}
+                  >
+                    <span style={{ borderBottom: "1px dotted #ccc" }}>
+                      {formattedDate}
+                    </span>
+                  </Tooltip>
+                );
+              }
+              return formattedDate;
+            },
+          },
+          {
+            title: t("table.nextInvoicingDate"),
+            dataIndex: "nextInvoicingDate",
+            key: "nextInvoicingDate",
+            width: 180,
+            render: (date) =>
+              typeof date === "string" ? date.split("T")[0] : "-",
+          },
+          {
+            title: t("table.createdAt"),
+            dataIndex: "createdAt",
+            key: "createdAt",
+            width: 160,
+            render: (date) => (date ? formatDate(date) : "-"),
+          },
+          ...((isSuperAdmin) ? [{
+            title: t("common.location") || "Location",
+            dataIndex: "serviceLocationId",
+            key: "location",
+            width: 100,
+            render: (id) => getLocationName(id),
+          }] : []),
+          {
+            title: t("table.actions"),
+            key: "actions",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <div onClick={(e) => e.stopPropagation()}>
+                <ActionMenu
+                  onAction={handleRowAction}
+                  record={record}
+                  items={[
+                    { key: "view", label: t("common.view") },
+                    ...(canUpdate && record.status !== "CANCELLED"
+                      ? [{ key: "edit", label: t("common.edit") }]
+                      : []),
+                  ]}
+                />
+              </div>
+            ),
+          },
+        ],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getSubscriptionBookingsColumns = useMemo(
@@ -950,6 +1010,13 @@ const useTableColumns = () => {
               <StatusBadge status={formatBookingStatus(status)} />
             ),
           },
+          ...((isSuperAdmin) ? [{
+            title: t("common.location") || "Location",
+            dataIndex: "serviceLocationId",
+            key: "location",
+            width: 100,
+            render: (id) => getLocationName(id),
+          }] : []),
           {
             title: t("table.adminNotes") || "Admin Notes",
             dataIndex: "adminNotes",
@@ -996,7 +1063,7 @@ const useTableColumns = () => {
             },
           },
         ],
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getPaymentsColumns = useMemo(
@@ -1054,7 +1121,7 @@ const useTableColumns = () => {
         key: "transactionid",
         width: 200,
         ellipsis: true,
-        render: (id) => id || "-",
+        render: (id) => getLocationName(id),
       },
       {
         title: t("table.status"),
@@ -1082,8 +1149,15 @@ const useTableColumns = () => {
         dataIndex: "createdat",
         key: "createdat",
         width: 160,
-        render: (date) => formatDate(date),
+        render: (date) => (date ? formatDate(date) : "-"),
       },
+      ...((isSuperAdmin) ? [{
+        title: t("common.location") || "Location",
+        dataIndex: "serviceLocationId",
+        key: "location",
+        width: 100,
+        render: (id) => getLocationName(id),
+      }] : []),
       {
         title: t("table.actions"),
         key: "actions",
@@ -1100,7 +1174,7 @@ const useTableColumns = () => {
         ),
       },
     ],
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getRolesColumns = useMemo(
@@ -1142,6 +1216,13 @@ const useTableColumns = () => {
           return new Date(text).toLocaleDateString();
         },
       },
+      ...((isSuperAdmin) ? [{
+        title: t("common.location") || "Location",
+        dataIndex: "serviceLocationId",
+        key: "location",
+        width: 100,
+        render: (id) => getLocationName(id),
+      }] : []),
       {
         title: t("table.actions"),
         key: "actions",
@@ -1162,7 +1243,7 @@ const useTableColumns = () => {
         ),
       },
     ],
-    [t],
+    [t, isSuperAdmin, getLocationName],
   );
 
   const getUserRolesColumns = useMemo(
@@ -1175,71 +1256,79 @@ const useTableColumns = () => {
         canUpdate = false,
         canDelete = false,
       ) => [
-      {
-        title: t("pages.userRoles.name") || "Name",
-        key: "name",
-        render: (_, record) => {
-          const name = `${record.firstName || ""} ${record.lastName || ""}`.trim();
-          return (
-            <span style={{ fontWeight: 500 }}>
-              {name || "-"}
-            </span>
-          );
-        },
-      },
-      {
-        title: t("pages.userRoles.email") || "Email",
-        dataIndex: "email",
-        key: "email",
-      },
-      {
-        title: t("pages.userRoles.roles") || "Role(s)",
-        key: "roles",
-        render: (_, record) => {
-          const userRoles = record.userRolePermission
-            ? record.userRolePermission
-                .filter((urp) => urp.role)
-                .map((urp) => urp.role)
-            : [];
-          if (userRoles.length === 0) {
-            return (
-              <Tag color="default">
-                {t("pages.userRoles.noRoles") || "No roles"}
-              </Tag>
-            );
-          }
-          return (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-              {userRoles.map((role) => (
-                <Tag key={role.id} color="green">
-                  {role.name}
-                </Tag>
-              ))}
-            </div>
-          );
-        },
-      },
-      {
-        title: t("table.actions"),
-        key: "actions",
-        width: 80,
-        align: "center",
-        render: (_, record) => (
-          <ActionMenu
-            onAction={handleRowAction}
-            record={record}
-            items={[
-              { key: "view", label: t("common.view") },
-              ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
-              ...(canDelete
-                ? [{ key: "delete", label: t("common.delete") }]
-                : []),
-            ]}
-          />
-        ),
-      },
-    ],
-    [t],
+          {
+            title: t("pages.userRoles.name") || "Name",
+            key: "name",
+            render: (_, record) => {
+              const name = `${record.firstName || ""} ${record.lastName || ""}`.trim();
+              return (
+                <span style={{ fontWeight: 500 }}>
+                  {name || "-"}
+                </span>
+              );
+            },
+          },
+          {
+            title: t("pages.userRoles.email") || "Email",
+            dataIndex: "email",
+            key: "email",
+            width: 200,
+          },
+          ...((isSuperAdmin) ? [{
+            title: t("common.location") || "Location",
+            dataIndex: "serviceLocationId",
+            key: "location",
+            width: 100,
+            render: (id) => getLocationName(id),
+          }] : []),
+          {
+            title: t("pages.userRoles.roles") || "Role(s)",
+            key: "roles",
+            render: (_, record) => {
+              const userRoles = record.userRolePermission
+                ? record.userRolePermission
+                  .filter((urp) => urp.role)
+                  .map((urp) => urp.role)
+                : [];
+              if (userRoles.length === 0) {
+                return (
+                  <Tag color="default">
+                    {t("pages.userRoles.noRoles") || "No roles"}
+                  </Tag>
+                );
+              }
+              return (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                  {userRoles.map((role) => (
+                    <Tag key={role.id} color="green">
+                      {role.name}
+                    </Tag>
+                  ))}
+                </div>
+              );
+            },
+          },
+          {
+            title: t("table.actions"),
+            key: "actions",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <ActionMenu
+                onAction={handleRowAction}
+                record={record}
+                items={[
+                  { key: "view", label: t("common.view") },
+                  ...(canUpdate ? [{ key: "edit", label: t("common.edit") }] : []),
+                  ...(canDelete
+                    ? [{ key: "delete", label: t("common.delete") }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ],
+    [t, isSuperAdmin, getLocationName],
   );
 
 

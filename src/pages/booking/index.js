@@ -52,12 +52,17 @@ import { PERMISSION_KEYS } from "@/utils/permissionConstants";
 import { getSafeValue, safeMap } from "@/utils/safeRendering";
 import { ExportOutlined } from "@ant-design/icons";
 import { Pagination } from "antd";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
+import LocationName from "@/components/common/LocationName";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useState } from "react";
 
 const BookingsPage = () => {
   const { t } = useTranslation();
   const { can } = usePermission();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
   const { getBookingsColumns } = useTableColumns();
 
   const BOOKING_FIELDS = useMemo(
@@ -142,8 +147,13 @@ const BookingsPage = () => {
         type: "textarea",
         fullWidth: true,
       },
+      ...((isSuperAdmin) ? [{
+        name: "serviceLocationId",
+        label: t("common.location") || "Location",
+        render: (val) => <LocationName id={val} />,
+      }] : []),
     ],
-    [t]
+    [t, isSuperAdmin]
   );
 
   const [activeView, setActiveView] = useState(VIEW_LIST);
@@ -151,6 +161,7 @@ const BookingsPage = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [statusFilter, setStatusFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState(null);
+  const [locationFilter, setLocationFilter] = useState(null);
   const [pagination, setPagination] = useState({ skip: 0, take: 10 });
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [modalState, setModalState] = useState({
@@ -193,8 +204,12 @@ const BookingsPage = () => {
       params.year = monthFilter.year();
     }
 
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+
     return params;
-  }, [debouncedSearchTerm, statusFilter, monthFilter, pagination, activeView]);
+  }, [debouncedSearchTerm, statusFilter, monthFilter, locationFilter, pagination, activeView]);
 
   const calendarQueryParams = useMemo(() => {
     const params = {
@@ -210,8 +225,12 @@ const BookingsPage = () => {
       params.status = statusFilter.toUpperCase();
     }
 
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+
     return params;
-  }, [monthFilter, debouncedSearchTerm, statusFilter]);
+  }, [monthFilter, debouncedSearchTerm, statusFilter, locationFilter]);
 
   const { data: listBookingsResponse, isLoading: isListLoading } = useBookings(listQueryParams, {
     enabled: activeView === VIEW_LIST,
@@ -304,8 +323,24 @@ const BookingsPage = () => {
         label: t("pages.bookings.fields.adminNotes") || "Admin Notes",
         type: "textarea",
       },
+      ...(isSuperAdmin
+        ? [
+            {
+              name: "serviceLocationId",
+              label: t("common.location") || "Location",
+              type: "custom",
+              component: (props) => <ServiceLocationSelector {...props} />,
+              rules: [
+                {
+                  required: true,
+                  message: t("common.locationRequired") || "Required",
+                },
+              ],
+            },
+          ]
+        : []),
     ],
-    [statusOptions, t, disabledDate]
+    [statusOptions, t, disabledDate, isSuperAdmin]
   );
 
   const closeModal = useCallback(() => {
@@ -324,6 +359,11 @@ const BookingsPage = () => {
 
   const handleDateChange = useCallback((date) => {
     setMonthFilter(date);
+    setPagination((prev) => ({ ...prev, skip: 0 }));
+  }, []);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
     setPagination((prev) => ({ ...prev, skip: 0 }));
   }, []);
 
@@ -454,7 +494,10 @@ const BookingsPage = () => {
               dateValue={activeView === VIEW_CALENDAR ? (monthFilter || dayjs()) : monthFilter}
               statusValue={statusFilter}
               searchValue={searchTerm}
+              locationValue={locationFilter}
+              onLocationChange={handleLocationChange}
               statusOptions={BOOKING_STATUS_OPTIONS}
+              showLocationFilter
             />
           </div>
           <ViewToggle

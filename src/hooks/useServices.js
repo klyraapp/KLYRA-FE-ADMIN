@@ -11,17 +11,19 @@ import {
   getServicesAdmin,
   updateService,
 } from "@/api/servicesApi";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import { useSelector } from "react-redux";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useToast from "./useToast";
 
 const SERVICES_QUERY_KEY = "services";
 const SERVICES_ADMIN_QUERY_KEY = "servicesAdmin";
 
-export const useServices = (options = {}) => {
+export const useServices = (params = {}, options = {}) => {
   return useQuery({
-    queryKey: [SERVICES_QUERY_KEY],
+    queryKey: [SERVICES_QUERY_KEY, params],
     queryFn: async () => {
-      const response = await getServices();
+      const response = await getServices(params);
       return response?.data || [];
     },
     staleTime: 5 * 60 * 1000,
@@ -32,6 +34,8 @@ export const useServices = (options = {}) => {
 };
 
 export const useServicesAdmin = (params = {}, options = {}) => {
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
+
   return useQuery({
     queryKey: [SERVICES_ADMIN_QUERY_KEY, params],
     queryFn: async () => {
@@ -52,6 +56,7 @@ export const useServicesAdmin = (params = {}, options = {}) => {
     staleTime: 5 * 60 * 1000,
     retry: false,
     refetchOnWindowFocus: false,
+    enabled: isSuperAdmin && (options.enabled !== false),
     ...options,
   });
 };

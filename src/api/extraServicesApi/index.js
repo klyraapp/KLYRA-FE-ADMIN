@@ -18,8 +18,8 @@ const buildExtraServiceFormData = (data) => {
   return formData;
 };
 
-export const getExtraServices = () => {
-  return api.get(EXTRA_SERVICES_ENDPOINT);
+export const getExtraServices = (params = {}) => {
+  return api.get(EXTRA_SERVICES_ENDPOINT, { params });
 };
 
 export const getExtraServiceById = (id) => {

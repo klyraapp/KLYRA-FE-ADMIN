@@ -7,10 +7,10 @@ import api from "@/utils/axiosMiddleware";
 
 const ANALYTICS_ENDPOINT = "/analytics-and-stats";
 
-export const getDashboardStats = () => {
-  return api.get(`${ANALYTICS_ENDPOINT}/dashboard`);
+export const getDashboardStats = (params = {}) => {
+  return api.get(`${ANALYTICS_ENDPOINT}/dashboard`, { params });
 };
 
-export const getAnalyticsStats = () => {
-  return api.get(`${ANALYTICS_ENDPOINT}/analytics`);
+export const getAnalyticsStats = (params = {}) => {
+  return api.get(`${ANALYTICS_ENDPOINT}/analytics`, { params });
 };

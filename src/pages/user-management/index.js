@@ -15,7 +15,8 @@ import styles from "../../../styles/UserManagement.module.css";
 const UserManagementPage = () => {
   const [filters, setFilters] = useState({});
 
-  const { data: users = [], isLoading } = useUsers();
+  const { data: usersData, isLoading } = useUsers();
+  const users = usersData?.records || [];
   const { mutate: deleteUser } = useDeleteUser();
 
   const transformedUsers = useMemo(() => {

@@ -12,12 +12,31 @@ import { useAnalyticsData } from "@/hooks/useAnalytics";
 import { useTranslation } from "@/hooks/useTranslation";
 import styles from "@/styles/analytics.module.css";
 import ErrorBoundary from "@/components/common/ErrorBoundary/ErrorBoundary";
+import FiltersBar from "@/components/FiltersBar/FiltersBar";
+import ServiceLocationSelector from "@/components/common/ServiceLocationSelector";
 import { safeMap } from "@/utils/safeRendering";
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
 
 const AnalyticsPage = () => {
   const { t } = useTranslation();
-  const { data: analyticsData, isLoading } = useAnalyticsData();
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
+  const [locationFilter, setLocationFilter] = useState(null);
+
+  const analyticsParams = useMemo(() => {
+    const params = {};
+    if (locationFilter && locationFilter !== "all") {
+      params.serviceLocationId = locationFilter;
+    }
+    return params;
+  }, [locationFilter]);
+
+  const { data: analyticsData, isLoading } = useAnalyticsData(analyticsParams);
+
+  const handleLocationChange = useCallback((value) => {
+    setLocationFilter(value);
+  }, []);
 
   const analyticsCards = useMemo(() => {
     if (!analyticsData?.stats) return [];
@@ -79,7 +98,16 @@ const AnalyticsPage = () => {
         <PageHeader
           titleKey="pages.analytics.title"
           subtitleKey="pages.analytics.subtitle"
-        />
+        >
+          {isSuperAdmin && (
+            <ServiceLocationSelector
+              value={locationFilter}
+              onChange={handleLocationChange}
+              showAllOption
+              style={{ width: 180 }}
+            />
+          )}
+        </PageHeader>
         <div className={styles.statsGrid}>{t("common.loading")}</div>
       </div>
     );
@@ -90,7 +118,16 @@ const AnalyticsPage = () => {
       <PageHeader
         titleKey="pages.analytics.title"
         subtitleKey="pages.analytics.subtitle"
-      />
+      >
+        {isSuperAdmin && (
+          <ServiceLocationSelector
+            value={locationFilter}
+            onChange={handleLocationChange}
+            showAllOption
+            style={{ width: 180 }}
+          />
+        )}
+      </PageHeader>
 
       <div className={styles.statsGrid}>
         <ErrorBoundary>

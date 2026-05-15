@@ -14,6 +14,7 @@ import { GrowthBook, GrowthBookProvider } from "@growthbook/growthbook-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { LocationProvider } from "@/context/LocationContext";
 import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import "../../styles/App.css";
@@ -58,11 +59,13 @@ const App = ({ Component, pageProps }) => {
       <Provider store={reduxStore}>
         <QueryClientProvider client={queryClient}>
           <LanguageProvider>
-            <ThemeProvider>
-              <AuthGuard>
-                {getLayout(<Component {...pageProps} />)}
+            <LocationProvider>
+              <ThemeProvider>
+                <AuthGuard>
+                  {getLayout(<Component {...pageProps} />)}
                 </AuthGuard>
-            </ThemeProvider>
+              </ThemeProvider>
+            </LocationProvider>
           </LanguageProvider>
         </QueryClientProvider>
       </Provider>

@@ -11,6 +11,10 @@ import { Checkbox } from "antd";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 import { memo } from "react";
+import { useSelector } from "react-redux";
+import { selectIsSuperAdmin } from "@/redux/reducers/permissionSlice";
+import ServiceLocationSelector from "../common/ServiceLocationSelector";
+import LocationName from "../common/LocationName";
 import styles from "@/styles/RoleManagement.module.css";
 
 const PermissionGroup = memo(({
@@ -22,7 +26,7 @@ const PermissionGroup = memo(({
   const viewPermission = group.permissions.find(
     (p) => p.action === "read" || p.action === "read_all"
   );
-  
+
   const isViewSelected = viewPermission ? selectedIds.includes(viewPermission.id) : false;
 
   const allSelected = group.permissions.every((p) =>
@@ -109,19 +113,19 @@ const CreateRoleModal = ({
   const handleTogglePermission = useCallback((permId, checked, group, action) => {
     setSelectedPermissions((prev) => {
       const isViewAction = action === "read" || action === "read_all";
-      
+
       if (!checked) {
         let newSelection = prev.filter((id) => id !== permId);
-        
+
         // If unselecting View, also unselect all CRUD in this group
         if (isViewAction) {
           const groupPermIds = group.permissions.map(p => p.id);
           newSelection = newSelection.filter(id => !groupPermIds.includes(id));
         }
-        
+
         return newSelection;
       }
-      
+
       return [...prev, permId];
     });
   }, []);
@@ -163,6 +167,7 @@ const CreateRoleModal = ({
 
       const payload = {
         name: values.name,
+        serviceLocationId: values.serviceLocationId,
       };
 
       if (isEditMode) {
@@ -184,15 +189,33 @@ const CreateRoleModal = ({
     [isEditMode, editData, selectedPermissions, onSubmit, permissionsData],
   );
 
-  const fields = useMemo(() => [
-    {
-      name: "name",
-      label: t("pages.roles.roleName") || "Role Name",
-      placeholder: t("pages.roles.roleNamePlaceholder") || "Enter role name",
-      rules: [{ required: true, message: t("pages.roles.roleNameRequired") || "Required" }],
-      fullWidth: true,
-    },
-  ], [t]);
+  const isSuperAdmin = useSelector(selectIsSuperAdmin);
+
+  const fields = useMemo(() => {
+    const baseFields = [
+      {
+        name: "name",
+        label: t("pages.roles.roleName") || "Role Name",
+        placeholder: t("pages.roles.roleNamePlaceholder") || "Enter role name",
+        rules: [{ required: true, message: t("pages.roles.roleNameRequired") || "Required" }],
+        fullWidth: true,
+      },
+    ];
+
+    if (isSuperAdmin) {
+      baseFields.push({
+        name: "serviceLocationId",
+        label: t("common.location") || "Location",
+        type: "custom",
+        component: (props) => <ServiceLocationSelector {...props} />,
+        render: (val) => <LocationName id={val} />,
+        rules: [{ required: true, message: t("common.locationRequired") || "Required" }],
+        fullWidth: true,
+      });
+    }
+
+    return baseFields;
+  }, [t, isSuperAdmin]);
 
   return (
     <DetailModal

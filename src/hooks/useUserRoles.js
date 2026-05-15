@@ -30,9 +30,12 @@ const useUserRoles = (userParams = {}) => {
   const toast = useToast();
 
   const {
-    data: users = [],
+    data: usersData,
     isLoading: isLoadingUsers,
   } = useAdmins(userParams);
+
+  const users = usersData?.records || [];
+  const totalUsers = usersData?.total || 0;
 
   const {
     data: roles = [],
